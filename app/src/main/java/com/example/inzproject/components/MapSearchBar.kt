@@ -1,6 +1,8 @@
 package com.example.inzproject.components
 
 import android.widget.ScrollView
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,6 +14,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +36,7 @@ fun MapSearchBar() {
         SearchBar(
             modifier = Modifier
                 .align(Alignment.TopCenter),
+            colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.background),
             query = text,
             onQueryChange = { text = it },
             onSearch = {
@@ -45,10 +50,23 @@ fun MapSearchBar() {
             onActiveChange = {
                 active = it
             },
-            placeholder = { Text("Wyszukaj miejsce...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            placeholder = {
+                Text("Wyszukaj miejsce...")
+                          },
+            leadingIcon = {
+                if (active) {
+                    Image(
+                        modifier = Modifier
+                            .size(40.dp),
+                        painter = painterResource(id = com.example.inzproject.R.mipmap.ic_logo_foreground),
+                        contentDescription = "Logo"
+                    )
+                } else {
+                    Icon(Icons.Default.Search, contentDescription = null)
+                }
+                          },
             trailingIcon = {
-                           if(active) {
+                           if (active) {
                                Icon(
                                    modifier = Modifier
                                        .clickable {
@@ -83,4 +101,10 @@ fun MapSearchBar() {
             }
         }
     }
+}
+
+@Composable
+@Preview
+fun MapSearchBarPreview() {
+    MapSearchBar()
 }

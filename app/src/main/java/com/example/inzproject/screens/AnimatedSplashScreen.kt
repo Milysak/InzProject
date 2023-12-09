@@ -1,24 +1,26 @@
 package com.example.inzproject.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.content.res.Configuration.UI_MODE_TYPE_CAR
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.inzproject.helpfunctions.createGradientBrush
 import com.example.inzproject.navigation.Routes
@@ -47,24 +49,38 @@ fun AnimatedSplashScreen(navController: NavController) {
 
 @Composable
 fun SplashScreen(alpha: Float) {
-    Box(modifier = Modifier
+    Column(modifier = Modifier
         .fillMaxSize()
         .background(
-            createGradientBrush(
-            listOf(
-                MaterialTheme.colorScheme.background,
-                MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
-            )
-        )
+            MaterialTheme.colorScheme.background
+            /*createGradientBrush(
+                listOf(
+                    MaterialTheme.colorScheme.background,
+                    MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
+                )
+            )*/
         ),
-        contentAlignment = Alignment.Center
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            modifier = Modifier.size(125.dp).alpha(alpha),
-            imageVector = Icons.Default.Person,
-            contentDescription = "App Icon",
-            tint = MaterialTheme.colorScheme.primary
+        Image(
+            modifier = Modifier
+                .size(150.dp)
+                .alpha(alpha = alpha),
+            painter = painterResource(id = com.example.inzproject.R.mipmap.ic_logo_foreground), contentDescription = "Logo")
+        Text(
+            modifier = Modifier
+                .alpha(alpha = alpha),
+            fontSize = 20.sp,
+            text = "Travel App",
+            color = MaterialTheme.colorScheme.onBackground,
+            fontStyle = FontStyle.Italic,
+            fontWeight = FontWeight.Bold
         )
+    }
+
+    Box() {
+        
     }
 }
 

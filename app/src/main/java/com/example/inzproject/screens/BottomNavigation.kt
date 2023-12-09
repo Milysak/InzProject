@@ -33,18 +33,31 @@ import com.example.inzproject.helpfunctions.createGradientBrush
 import com.example.inzproject.navigation.BottomNavGraph
 import com.example.inzproject.navigation.BottomRoutes
 import com.example.inzproject.navigation.Routes
+import com.example.inzproject.viewmodels.MainViewModel
 
 @Composable
-fun BottomNavigation() {
+fun BottomNavigation(mainViewModel: MainViewModel) {
 
     val navController = rememberNavController()
 
     Scaffold(
-        bottomBar = { BottomBar(navController = navController) }
-    ) {innerPadding ->
+        bottomBar = {
+            BottomBar(navController = navController)
+        }
+    ) { innerPadding ->
         // Apply the padding globally to the whole BottomNavScreensController
-        Box(modifier = Modifier.padding(innerPadding)) {
-            BottomNavGraph(navHostController = navController)
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .background(
+                createGradientBrush(
+                    listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
+                    )
+                )
+            ),
+        ) {
+            BottomNavGraph(navHostController = navController, mainViewModel = mainViewModel)
         }
 
     }

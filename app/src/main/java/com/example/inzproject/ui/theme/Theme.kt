@@ -10,10 +10,35 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.ViewCompat
+
+private val CustomDarkColorScheme = darkColorScheme(
+    primary = Color(0xFFCFDFFA),
+    onPrimary = Color(0xFF032B55),
+    background = Color(0xFF000D1B),
+    secondary = Color(0xFF041429),
+    onSecondary = Color(0xFFEFF5FD),
+    tertiary = Pink80,
+    onSurface = Color(0xFFEBF0FD),
+    outline = Color(0xFFEBF0FD).copy(alpha = 0.75f),
+    onSurfaceVariant = Color(0xFFEBF0FD).copy(alpha = 0.75f)
+)
+
+private val CustomLightColorScheme = lightColorScheme(
+    primary = Color(0xFF012F5E),
+    onPrimary = Color(0xFFEDF4FF),
+    background = Color(0xFFFCFDFF),
+    secondary = Color(0xFFF9FCFF),
+    onSecondary = Color(0xFF1E569E),
+    tertiary = Pink40,
+    onSurface = Color(0xFF001227),
+    outline = Color(0xFF001227).copy(alpha = 0.75f),
+    onSurfaceVariant = Color(0xFF001227).copy(alpha = 0.75f)
+)
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -49,8 +74,8 @@ fun InzProjectTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> CustomDarkColorScheme
+        else -> CustomLightColorScheme
     }
     val view = LocalView.current
     if (!view.isInEditMode) {
