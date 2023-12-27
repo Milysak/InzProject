@@ -14,25 +14,26 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.inzproject.screens.CompassScreen
 import com.example.inzproject.screens.HomeScreen
+import com.example.inzproject.screens.LikeToVisitScreen
 import com.example.inzproject.screens.MapScreen
 import com.example.inzproject.viewmodels.MainViewModel
 
 @Composable
-fun BottomNavGraph(navHostController: NavHostController, mainViewModel: MainViewModel) {
+fun BottomNavGraph(navHostController: NavHostController) {
 
     NavHost(navController = navHostController, startDestination = BottomRoutes.Home.route) {
         composable(route = BottomRoutes.Home.route) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+
                 HomeScreen()
+                //
+
             }
         }
 
         composable(route = BottomRoutes.LikeToVisit.route) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "LOVE")
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center,) {
+                LikeToVisitScreen()
             }
         }
 
@@ -41,7 +42,7 @@ fun BottomNavGraph(navHostController: NavHostController, mainViewModel: MainView
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                MapScreen(mainViewModel.mapViewModel)
+                MapScreen()
             }
         }
 

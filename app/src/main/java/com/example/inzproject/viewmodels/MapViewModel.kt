@@ -5,7 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.inzproject.R
+import com.example.inzproject.WeatherForecast.domain.repository.WeatherRepository2
 import com.example.inzproject.data.dataclasses.MyMarker
+import com.example.inzproject.domain.location.LocationTracker
 import com.example.inzproject.domain.repository.WeatherRepository
 import com.example.inzproject.domain.weather.WeatherData
 import com.example.inzproject.domain.weather.WeatherType
@@ -16,8 +18,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class MapViewModel(
-    private val repository: WeatherRepository
+@HiltViewModel
+class MapViewModel @Inject constructor(
+    private var repository: WeatherRepository,
 ): ViewModel() {
     var state by mutableStateOf(MapState())
 

@@ -6,6 +6,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.inzproject.components.MapSearchBar
 import com.example.inzproject.data.dataclasses.MyMarker
@@ -24,7 +25,7 @@ import java.util.concurrent.ThreadLocalRandom
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
 fun MapScreen(
-    viewModel : MapViewModel
+    viewModel : MapViewModel = hiltViewModel(),
 ) {
     /*viewModel.markers.add(com.example.inzproject.data.dataclasses.MyMarker(LatLng(50.24107598158953, 18.99944985875562)))
     viewModel.markers.add(com.example.inzproject.data.dataclasses.MyMarker(LatLng(50.18404284819005, 19.060459047724578)))
