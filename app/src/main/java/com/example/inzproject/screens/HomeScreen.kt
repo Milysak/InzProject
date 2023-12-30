@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,9 +86,8 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(DarkBlue)
+                .background(MaterialTheme.colorScheme.background)
         ) {
-
 
             showDatePicker(context, minDate, maxDate,viewModel, selectedDay){ newSelectedDay ->
                 selectedDay = newSelectedDay // Update the selectedDay state
@@ -95,20 +95,13 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.size(10.dp))
 
-
-
-
-
-
-
-
-
-
             WeatherCard(
                 state = viewModel.state,
-                backgroundColor = DeepBlue
+                backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.125f)
             )
+
             Spacer(modifier = Modifier.height(5.dp))
+
             WeatherForecast(state = viewModel.state)
         }
         if (viewModel.state.isLoading) {
@@ -161,7 +154,7 @@ fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weathe
     datePickerDialog.datePicker.maxDate = maxDate.timeInMillis
 
     Column(
-        modifier = Modifier.height(90.dp),
+        modifier = Modifier.height(90.dp).padding(horizontal = 10.dp),
     ) {
         androidx.compose.material.Text(
             text = "Wybrana Data: ${selectedDate.value.get(Calendar.DAY_OF_MONTH)}/${

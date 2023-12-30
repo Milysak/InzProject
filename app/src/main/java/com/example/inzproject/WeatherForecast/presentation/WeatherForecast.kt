@@ -1,8 +1,10 @@
 package com.example.inzproject.WeatherForecast.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -33,25 +35,31 @@ fun WeatherForecast(
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 10.dp)
         ) {
 
-            Text(
+            /*Text(
                 text = " ${day}.${month}.$year",
                 fontSize = 15.sp,
                 color = Color.White
-            )
+            )*/
             Spacer(modifier = Modifier.height(5.dp))
+
             LazyRow(content = {
                 items(data) { weatherData ->
-                    HourlyWeatherDisplay(
-                        weatherData = weatherData,
-                        modifier = Modifier
-                            .height(100.dp)
-                            .padding(horizontal = 16.dp)
-                    )
-                }
-            })
+                    //if (weatherData.time > state.weatherInfo.currentWeatherData?.time) {
+                        HourlyWeatherDisplay(
+                            weatherData = weatherData,
+                            modifier = Modifier
+                                .height(100.dp)
+                                .width(75.dp)
+                                .padding(horizontal = 3.dp)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.125f))
+                        )
+                    }
+                //}
+            }
+            )
         }
     }
 }
