@@ -1,5 +1,7 @@
 package com.example.inzproject.PlacesToVisit
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,12 +10,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +34,7 @@ import com.example.inzproject.PlacesToVisit.ROOM.FavouritePlacesDatabase
 
 import com.example.inzproject.PlacesToVisit.Repository.PlaceState
 import com.example.inzproject.WeatherForecast.presentation.WeatherState
+import com.example.inzproject.helpfunctions.createGradientBrush
 
 import com.example.inzproject.ui.theme.beige
 import com.example.inzproject.ui.theme.beigebrown
@@ -48,71 +53,111 @@ fun PlacesCard(
 ) {
 
     println(state.PlaceInfo?.results)
+
     state.PlaceInfo?.results.let { data ->
-        Card(
+        Box(
             modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 8.dp)
-                .fillMaxWidth(),
-            elevation = 2.dp,
-            backgroundColor = beigebrown,
-            shape = RoundedCornerShape(corner = CornerSize(16.dp)),
+                .fillMaxSize()
+                .padding(horizontal = 10.dp)
+                .padding(bottom = 20.dp),
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 items(items = data ?: emptyList()) { place ->
 
                     if (place.rating != null && place.rating >= viewModel.filterMinRating && place.rating <= viewModel.filterMaxRating) {
-                        PlaceListItem(place = place,viewModel)
+                        PlaceListItem(place = place, viewModel)
                     }
-                }
 
+                }
             }
         }
     }
 }
 
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun PlaceListItem(place: PlaceClass,viewModel: PlacesViewModel) {
-    Card(
+    Box(
         modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 8.dp)
             .fillMaxWidth(),
-        elevation = 2.dp,
-        backgroundColor = beige,
-        shape = RoundedCornerShape(corner = CornerSize(16.dp)),
     ) {
-        Row(Modifier.clickable { /* Handle click if needed */ }) {
-            Column(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-                    .align(Alignment.CenterVertically)
-            ) {
-                Text(text = place.name, style = typography1.h6)
+        Column {
 
-                Row {
-                    Text(text = place.vicinity, style = typography1.caption)}
-                    Spacer(modifier = Modifier.size(10.dp))
+            Divider(
+                color = MaterialTheme.colorScheme.primary.copy(0.25f)
+            )
+
+            Row(Modifier.clickable { /* Handle click if needed */ }) {
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            color = MaterialTheme.colorScheme.onBackground,
+                            text = place.name,
+                            style = typography1.h6
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        val newplace = PlaceClass(
+                            place_id = place.place_id,
+                            name = place.name,
+                            vicinity = place.vicinity,
+                            rating = place.rating,
+                            icon = place.icon
+                        )
+
+                        ClickableHeart(newplace, viewModel)
+                    }
 
                     Row {
-                        Text(text = place.rating.toString(), style = typography1.caption)
+                        Text(
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                            text = place.vicinity,
+                            style = typography1.caption
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.size(10.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            color = MaterialTheme.colorScheme.primary,
+                            text = place.rating.toString(),
+                            style = typography1.caption
+                        )
+
+                        Spacer(modifier = Modifier.width(5.dp))
+
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
-                            modifier = Modifier.height(15.dp)
-
+                            modifier = Modifier.height(15.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.size(20.dp))
-                         var newplace=PlaceClass(place_id = place.place_id, name = place.name, vicinity = place.vicinity, rating = place.rating, icon = place.icon)
-
-                           ClickableHeart(newplace,viewModel)}
                     }
                 }
             }
+
+            Divider(
+                color = MaterialTheme.colorScheme.primary.copy(0.25f)
+            )
+        }
+    }
         }
 
 
@@ -136,7 +181,8 @@ fun ClickableHeart(newplace:PlaceClass,viewModel: PlacesViewModel){
         heartIcon = Icons.Default.FavoriteBorder
         Message = "Place remove from your favorites list"
     }
-    Icon(imageVector = heartIcon,
+    Icon(
+        imageVector = heartIcon,
         contentDescription = null,
         modifier = Modifier
             .clickable {
@@ -145,7 +191,7 @@ fun ClickableHeart(newplace:PlaceClass,viewModel: PlacesViewModel){
                         println(newplace.name)
 
                         viewModel.savePlace(newplace)
-                      //  placeDao.insertPlace(newplace)
+                        //  placeDao.insertPlace(newplace)
                     }
                 } else {
                     coroutineScope.launch {
@@ -157,7 +203,8 @@ fun ClickableHeart(newplace:PlaceClass,viewModel: PlacesViewModel){
                 isFavourite = !isFavourite
 
             }
-            .padding(4.dp)
+            .padding(4.dp),
+        tint = MaterialTheme.colorScheme.onBackground
     )
 
 }

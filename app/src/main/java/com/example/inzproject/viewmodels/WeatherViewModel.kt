@@ -171,7 +171,7 @@ class WeatherViewModel @Inject constructor(
                             state = state.copy(
                                 weatherInfo = null,
                                 isLoading = false,
-                                error = "Unknown place."
+                                error = "To miejsce jest nieznane!"
                             )
 
                             null

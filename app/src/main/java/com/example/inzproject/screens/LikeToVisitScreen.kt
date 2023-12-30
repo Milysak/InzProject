@@ -1,5 +1,5 @@
 package com.example.inzproject.screens
-import androidx.compose.material3.IconButton
+import android.graphics.Paint.Align
 //import androidx.compose.material3.icons.filled.*
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,9 +13,16 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,8 +43,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import com.example.inzproject.PlacesToVisit.*
 import com.example.inzproject.PlacesToVisit.ROOM.FavouritePlacesDatabase
+import com.example.inzproject.R
 
 import com.example.inzproject.WeatherForecast.presentation.ui.theme.DeepBlue
+import com.example.inzproject.helpfunctions.createGradientBrush
 import com.example.inzproject.viewmodels.PlacesViewModel
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import kotlinx.coroutines.launch
@@ -45,9 +54,15 @@ import kotlinx.coroutines.launch
 //import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LikeToVisitScreen(viewModel: PlacesViewModel = hiltViewModel()) {
     var textState by remember { mutableStateOf("") }
+    var active by remember { mutableStateOf(false) }
+    var items = remember {
+        mutableStateListOf("Gliwice")
+    }
+
     var switchState by remember { mutableStateOf(false) }
     var PlacesList: List<PlaceClass>?
     var isFilterDialogVisible by remember { mutableStateOf(false) }
@@ -93,15 +108,7 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
 
  //viewModel.loadPlaces()
 
-    //println(viewMode)
-    // Kolor różowego tła
-    val pinkBackgroundColor = Color(0xFFFFB6C1)
-
-    // Kolor czerwony
-    val ButtonColors = Color(0xFFB51CEC)
-
-    // Kolor ciemnego różu
-    val darkPinkColor = Color(0xFFE0B9EE)
+    //println(viewMode
 
 //    viewModel.loadPlaces()
 //    val places = remember { DataProvider.placeList }
@@ -113,31 +120,28 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(darkPinkColor)
+                .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
         ) {
             // TopAppBar z przyciskiem kalendarza, polem tekstowym i przyciskiem wyszukiwania
-            TopAppBar(
-
-                backgroundColor = Color(0xFF821FFC),
-                elevation = 0.dp,
-                contentColor = Color.White,
-                modifier = Modifier.height(130.dp)
+            Box(
+                modifier = Modifier.height(140.dp)
             ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
 
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
+                            .height(65.dp)
+                            .padding(horizontal = 10.dp)
+                            .padding(top = 12.dp),
                     ) {
                         // Przycisk z ikoną kalendarza
 
                         Box(
                             modifier = Modifier
-                                .size(56.dp)
-                                .background(pinkBackgroundColor, shape = CircleShape),
+                                .size(55.dp)
+                                .background(androidx.compose.material3.MaterialTheme.colorScheme.primary, shape = CircleShape),
 
                             contentAlignment = Alignment.Center
                         ) {
@@ -153,7 +157,7 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                                     // viewsavePlaces(places,viewModel)
                                     isFilterDialogVisible = true
                                     // Tutaj możesz umieścić kod, który zostanie wykonany po zamknięciu okna dialogowego
-       println(viewModel.LocalizationCoordinates)
+                                    println(viewModel.LocalizationCoordinates)
                                     /* Akcja przycisku kalendarza */
                                     println("czy twoje")
                                     println(viewModel.currentLocation)
@@ -162,25 +166,106 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                                 Icon(
                                     imageVector = Icons.Default.FilterAlt,
                                     contentDescription = "Przycisk filtrów",
-                                    tint = Color.White
+                                    tint = androidx.compose.material3.MaterialTheme.colorScheme.background
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.weight(0.8f))
+                        Box {
+                            DockedSearchBar(
+                                modifier = Modifier.padding(start = 7.5.dp),
+                                colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.background),
+                                query = textState,
+                                onQueryChange = { textState = it },
+                                onSearch = {
+                                    viewModel.setLocalization(textState)
+
+                                    // Tutaj możesz użyć wartości coordinates, która zostanie zaktualizowana po załadowaniu danych
+
+                                    // Następnie możesz kontynuować z funkcją getPlacesAsync, itd.
+
+                                    viewModel.getPlacesAsync(context)
+
+                                    if (textState !in items) {
+                                        items.add(0, textState)
+                                    }
+
+                                    active = false
+                                    textState = ""
+                                },
+                                active = active,
+                                onActiveChange = {
+                                    active = it
+                                },
+                                placeholder = {
+                                    androidx.compose.material3.Text("Wyszukaj miejsce...")
+                                },
+                                leadingIcon = {
+                                    if (active) {
+                                        Image(
+                                            modifier = Modifier
+                                                .size(40.dp),
+                                            painter = painterResource(id = R.mipmap.ic_logo_foreground),
+                                            contentDescription = "Logo"
+                                        )
+                                    } else {
+                                        androidx.compose.material3.Icon(
+                                            Icons.Default.Search,
+                                            contentDescription = null
+                                        )
+                                    }
+                                },
+                                trailingIcon = {
+                                    if (active) {
+                                        androidx.compose.material3.Icon(
+                                            modifier = Modifier
+                                                .clickable {
+                                                    if (textState.isNotEmpty()) {
+                                                        textState = ""
+                                                    } else {
+                                                        active = false
+                                                    }
+                                                },
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Close Icon"
+                                        )
+                                    }
+                                },
+                            ) {
+                                /*items.forEach {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(all = 15.dp)
+                                            .clickable {
+                                                textState = it
+                                            }
+                                    ) {
+                                        androidx.compose.material3.Icon(
+                                            modifier = Modifier.padding(end = 14.dp),
+                                            imageVector = Icons.Default.History,
+                                            contentDescription = "History Icon"
+                                        )
+                                        Text(text = it)
+                                    }
+                                }*/
+                            }
+                        }
+
+                        /*Spacer(modifier = Modifier.weight(0.8f))
 
                         // Pole tekstowe
                         TextInputDemo(textState) { newTextInput ->
                             textState = newTextInput
                         }
 
-                        Spacer(modifier = Modifier.weight(0.8f))
+                        Spacer(modifier = Modifier.weight(0.8f))*/
 
                         // Przycisk z ikoną wyszukiwania
-                        Box(
+                        /*Box(
                             modifier = Modifier
-                                .size(56.dp)
-                                .background(pinkBackgroundColor, shape = CircleShape),
+                                .size(55.dp)
+                                .background(androidx.compose.material3.MaterialTheme.colorScheme.primary, shape = CircleShape),
 
                             contentAlignment = Alignment.Center
                         ) {
@@ -218,59 +303,75 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = "Wyszukaj",
-                                    tint = Color.White
+                                    tint = androidx.compose.material3.MaterialTheme.colorScheme.background
                                 )
                             }
-                        }
+                        }*/
                     }
+
                     Spacer(modifier = Modifier.height(5.dp))
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
-                            .align(Alignment.CenterHorizontally)
+                            .align(Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Leading icon
                         Icon(
+                            modifier = Modifier.padding(end = 7.5.dp).size(30.dp),
                             imageVector = Icons.Default.FavoriteBorder,
                             contentDescription = null,
-                            modifier = Modifier.clickable { /* Obsługa kliknięcia */ }
+                            tint = Color.Red.copy(alpha = 0.75f)
                         )
 
                         // Switch
-                        Switch(
+                        androidx.compose.material3.Switch(
                             checked = switchState,
                             onCheckedChange = { checked ->
                                 switchState = checked
                             },
-                            modifier = Modifier.padding(horizontal = 8.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp),
                         )
 
                         // Trailing icon
                         Icon(
+                            modifier = Modifier.padding(start = 7.5.dp).size(30.dp),
                             imageVector = Icons.Default.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.clickable { /* Obsługa kliknięcia */ }
+                            tint = Color.Red.copy(alpha = 0.75f)
                         )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .background(
+                                createGradientBrush(
+                                    listOf(
+                                        MaterialTheme.colorScheme.background,
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.125f)
+                                    )
+                                )
+                            )
+                            .fillMaxWidth()
+                            .height(3.dp)
+                    ) {
+
                     }
                 }
             }
 
-
-            Spacer(modifier = Modifier.height(5.dp))
             if (isFilterDialogVisible) {
                 OpenFilterDialog(
                    isDialogVisible = isFilterDialogVisible,
-
-                    onClose = { isFilterDialogVisible = false }
-                    ,viewModel
-
-
+                    onClose = { isFilterDialogVisible = false },
+                    viewModel
                 )
 
             }
-            PlacesCard(state = viewModel.state, backgroundColor = DeepBlue,viewModel = viewModel)
+
+            PlacesCard(state = viewModel.state, backgroundColor = DeepBlue, viewModel = viewModel)
 
         }
                 if (viewModel.state.isLoading) {

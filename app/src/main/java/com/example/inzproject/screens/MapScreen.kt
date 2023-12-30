@@ -32,7 +32,11 @@ fun MapScreen(
     viewModel.markers.add(com.example.inzproject.data.dataclasses.MyMarker(LatLng(50.18837862274404, 18.956688860933173)))
 */
     Scaffold(
-        topBar = { MapSearchBar() }
+        topBar = {
+            MapSearchBar(
+
+            )
+        }
     ) {
         var isInit by mutableStateOf(false)
 

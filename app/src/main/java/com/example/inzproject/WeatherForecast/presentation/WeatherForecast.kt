@@ -9,6 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.inzproject.WeatherForecast.domain.weather.WeatherData
@@ -38,11 +40,13 @@ fun WeatherForecast(
                 .padding(horizontal = 10.dp)
         ) {
 
-            /*Text(
-                text = " ${day}.${month}.$year",
-                fontSize = 15.sp,
+            Text(
+                text = "Prognoza na: ${day}.${month}.$year",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
                 color = Color.White
-            )*/
+            )
+
             Spacer(modifier = Modifier.height(5.dp))
 
             LazyRow(content = {
@@ -52,7 +56,7 @@ fun WeatherForecast(
                             weatherData = weatherData,
                             modifier = Modifier
                                 .height(100.dp)
-                                .width(75.dp)
+                                .width(85.dp)
                                 .padding(end = 5.dp)
                         )
                     }

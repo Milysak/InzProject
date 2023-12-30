@@ -25,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -85,11 +86,7 @@ fun HomeScreen(
     maxDate.add(Calendar.DAY_OF_MONTH, 7)
 
 
-    Box(
-
-
-    ) {
-
+    Box {
 
         Column(
             modifier = Modifier
@@ -97,7 +94,7 @@ fun HomeScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
 
-            showDatePicker(context, minDate, maxDate,viewModel, selectedDay){ newSelectedDay ->
+            showDatePicker(context, minDate, maxDate,viewModel, selectedDay) { newSelectedDay ->
                 selectedDay = newSelectedDay // Update the selectedDay state
             }
 
@@ -114,12 +111,14 @@ fun HomeScreen(
         }
         if (viewModel.state.isLoading) {
             CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center),
+                color = MaterialTheme.colorScheme.primary
             )
         }
         viewModel.state.error?.let { error ->
             androidx.compose.material.Text(
                 text = error,
+                fontSize = 15.sp,
                 color = Color.Red,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.Center)
@@ -149,7 +148,7 @@ fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weathe
     val datePickerDialog = remember {
         DatePickerDialog(
             context,
-            { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+            { dP: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
                 val selected = Calendar.getInstance().apply {
                     set(year, month, dayOfMonth)
                 }
@@ -161,7 +160,7 @@ fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weathe
             },
             currentDate.get(Calendar.YEAR),
             currentDate.get(Calendar.MONTH),
-            currentDate.get(Calendar.DAY_OF_MONTH)
+            currentDate.get(Calendar.DAY_OF_MONTH),
         )
     }
 
@@ -172,7 +171,7 @@ fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weathe
         modifier = Modifier
             .height(65.dp)
             .padding(horizontal = 10.dp)
-            .padding(top = 7.dp),
+            .padding(top = 12.dp),
     ) {
         /*androidx.compose.material.Text(
             text = "Wybrana Data: ${selectedDate.value.get(Calendar.DAY_OF_MONTH)}/${
@@ -182,8 +181,6 @@ fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weathe
             }/${selectedDate.value.get(Calendar.YEAR)}",
             color = Color.White
         )*/
-
-        Spacer(modifier = Modifier.size(5.dp))
 
         Row(
             modifier = Modifier.fillMaxSize()
@@ -273,7 +270,7 @@ fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weathe
                         }
                     },
                 ) {
-                    items.forEach {
+                    /*items.forEach {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -289,7 +286,7 @@ fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weathe
                             )
                             Text(text = it)
                         }
-                    }
+                    }*/
                 }
 
                 /*TextInputDemo(textState) { newTextInput ->
