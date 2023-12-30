@@ -1,9 +1,11 @@
 package com.example.inzproject.WeatherForecast.presentation
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -28,25 +30,32 @@ fun HourlyWeatherDisplay(
         )
     }
 
-    Column(
+    Card(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.125f),
+        ),
     ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(vertical = 5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
 
-        Text(
-            text = "${weatherData.temperatureCelsius}°C",
-            color = textColor,
-            fontWeight = FontWeight.Bold
-        )
-        Image(
-            painter = painterResource(id = weatherData.weatherType.iconRes),
-            contentDescription = null,
-            modifier = Modifier.width(30.dp)
-        )
-        Text(
-            text = FormatOfTheTime,
-            color = Color.White
-        )
+            Text(
+                text = "${weatherData.temperatureCelsius}°C",
+                color = textColor,
+                fontWeight = FontWeight.Bold
+            )
+            Image(
+                painter = painterResource(id = weatherData.weatherType.iconRes),
+                contentDescription = null,
+                modifier = Modifier.width(30.dp)
+            )
+            Text(
+                text = FormatOfTheTime,
+                color = Color.White
+            )
+        }
     }
 }

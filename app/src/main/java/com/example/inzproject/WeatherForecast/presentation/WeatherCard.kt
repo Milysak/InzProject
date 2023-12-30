@@ -33,6 +33,7 @@ import kotlin.math.roundToInt
 import com.example.inzproject.WeatherForecast.presentation.ui.theme.DarkBlue
 import androidx.compose.material.Card as Card1
 import androidx.compose.material.*
+import androidx.compose.ui.text.toUpperCase
 
 //tu znajduję się duża główna karta z pogodą z obecnej chwili
 @Composable
@@ -40,13 +41,12 @@ fun WeatherCard(
     state: WeatherState,
     backgroundColor: Color,
     modifier: Modifier = Modifier
-
 ) {
 
 //var data : WeatherData
     val context = LocalContext.current
     var cityoflocalization = state.city
-
+    cityoflocalization = cityoflocalization[0].uppercase() + cityoflocalization.drop(1)
 
     state.weatherInfo?.currentWeatherData?.let { data ->
 
@@ -76,7 +76,9 @@ fun WeatherCard(
                     modifier = Modifier.align(Alignment.End),
                     color = Color.White
                 )
+
                 Spacer(modifier = Modifier.height(5.dp))
+
                 Text(
                     text = cityoflocalization,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -85,29 +87,34 @@ fun WeatherCard(
 
                 )
 
+                Spacer(modifier = Modifier.height(20.dp))
+
                 Image(
                     painter = painterResource(id = data.weatherType.iconRes),
                     contentDescription = null,
-                    modifier = Modifier
-                        .width(120.dp)
-                        .height(110.dp)
+                    modifier = Modifier.size(100.dp)
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+
                 Text(
                     text = "${data.temperatureCelsius}°C",
                     fontSize = 40.sp,
                     color = Color.White
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(
+
+                /*Text(
                     text = data.weatherType.weatherDescription,
                     fontSize = 20.sp,
                     color = Color.White
-                )
+                )*/
+
                 Spacer(modifier = Modifier.height(12.dp))
+
                 Row(
                     //  modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier.padding(bottom = 15.dp)
                 ) {
 
                     WeatherDataDisplay(

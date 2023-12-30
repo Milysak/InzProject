@@ -53,8 +53,7 @@ fun WeatherForecast(
                             modifier = Modifier
                                 .height(100.dp)
                                 .width(75.dp)
-                                .padding(horizontal = 3.dp)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.125f))
+                                .padding(end = 5.dp)
                         )
                     }
                 //}

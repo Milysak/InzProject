@@ -31,9 +31,9 @@ fun MapSearchBar() {
         Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.55f)
-            .padding(horizontal = 7.dp)
+            .padding(start = 7.dp, end = 7.dp, top = 5.dp)
     ) {
-        SearchBar(
+        DockedSearchBar(
             modifier = Modifier
                 .align(Alignment.TopCenter),
             colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.background),
