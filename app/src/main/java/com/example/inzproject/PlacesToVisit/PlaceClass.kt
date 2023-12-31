@@ -25,7 +25,9 @@ data class PlaceClass(
    //   val types: List<String>,
 
     val vicinity: String,
-    val icon: String
+    val icon: String,
+    val longitute: Float,
+    val latitute: Float
 
 
 )

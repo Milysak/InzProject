@@ -1,6 +1,11 @@
 package com.example.inzproject.PlacesToVisit
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,14 +14,13 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.FindReplace
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -45,14 +50,16 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PlacesCard(
+    context: Context,
     state: PlaceState,
     backgroundColor: Color,
     modifier: Modifier = Modifier,
     viewModel: PlacesViewModel
 
 ) {
-
     println(state.PlaceInfo?.results)
+
+    val localeContext = LocalContext.current
 
     state.PlaceInfo?.results.let { data ->
         Box(
@@ -65,12 +72,30 @@ fun PlacesCard(
                 modifier = Modifier
                     .fillMaxSize(),
             ) {
-                items(items = data ?: emptyList()) { place ->
+                items(
+                    items = data ?: emptyList()
+                ) { place ->
 
                     if (place.rating != null && place.rating >= viewModel.filterMinRating && place.rating <= viewModel.filterMaxRating) {
-                        PlaceListItem(place = place, viewModel)
-                    }
+                        PlaceListItem(
+                            place = place,
+                            viewModel = viewModel
+                        ) { clickedPlace ->
 
+                            // Create a Uri from an intent string. Use the result to create an Intent.
+                            val gmmIntentUri = Uri.parse("geo:${clickedPlace.latitute},${clickedPlace.longitute}")
+
+                            // Create an Intent from gmmIntentUri. Set the action to ACTION_VIEW
+                            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+
+                            // Make the Intent explicit by setting the Google Maps package
+                            mapIntent.setPackage("com.google.android.apps.maps")
+
+                            // Attempt to start an activity that can handle the Intent
+                            startActivity(localeContext, mapIntent, null)
+
+                        }
+                    }
                 }
             }
         }
@@ -80,18 +105,27 @@ fun PlacesCard(
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun PlaceListItem(place: PlaceClass,viewModel: PlacesViewModel) {
-    Box(
+fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (PlaceClass) -> Unit) {
+    Row(
         modifier = Modifier
             .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
 
             Divider(
                 color = MaterialTheme.colorScheme.onBackground.copy(0.2f)
             )
 
-            Row(Modifier.clickable { /* Handle click if needed */ }) {
+            Row(
+                Modifier
+                    .clickable {
+                        onItemClick(place)
+                    }
+            ) {
                 Column(
                     modifier = Modifier
                         .padding(8.dp)
@@ -108,14 +142,19 @@ fun PlaceListItem(place: PlaceClass,viewModel: PlacesViewModel) {
                             style = typography1.h6
                         )
 
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(
+                            modifier = Modifier
+                                .weight(1f)
+                        )
 
                         val newplace = PlaceClass(
                             place_id = place.place_id,
                             name = place.name,
                             vicinity = place.vicinity,
                             rating = place.rating,
-                            icon = place.icon
+                            icon = place.icon,
+                            longitute = place.longitute,
+                            latitute = place.latitute
                         )
 
                         ClickableHeart(newplace, viewModel)
@@ -144,7 +183,10 @@ fun PlaceListItem(place: PlaceClass,viewModel: PlacesViewModel) {
                             style = typography1.caption
                         )
 
-                        Spacer(modifier = Modifier.width(5.dp))
+                        Spacer(
+                            modifier = Modifier
+                                .width(5.dp)
+                        )
 
                         Icon(
                             imageVector = Icons.Default.Star,
@@ -157,7 +199,7 @@ fun PlaceListItem(place: PlaceClass,viewModel: PlacesViewModel) {
             }
         }
     }
-        }
+}
 
 
 @Composable

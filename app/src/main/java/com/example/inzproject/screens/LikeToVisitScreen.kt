@@ -1,4 +1,6 @@
 package com.example.inzproject.screens
+import android.app.Activity
+import android.content.Context
 import android.graphics.Paint.Align
 //import androidx.compose.material3.icons.filled.*
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -63,6 +65,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LikeToVisitScreen(viewModel: PlacesViewModel = hiltViewModel()) {
+    val context = LocalContext.current
+
     var textState by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     var items = remember {
@@ -77,12 +81,6 @@ fun LikeToVisitScreen(viewModel: PlacesViewModel = hiltViewModel()) {
     var switchState by remember { mutableStateOf(false) }
     var PlacesList: List<PlaceClass>?
     var isFilterDialogVisible by remember { mutableStateOf(false) }
-
-
-    val context = LocalContext.current
-
-
-
 
 
 if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState == "") {
@@ -160,10 +158,7 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                             contentAlignment = Alignment.Center
                         ) {
 
-                           var Con= LocalContext
-
                             IconButton(
-
 
                                 onClick = {
 
@@ -397,12 +392,18 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
 
             }
 
-            PlacesCard(state = viewModel.state, backgroundColor = DeepBlue, viewModel = viewModel)
+            PlacesCard(
+                context = context,
+                state = viewModel.state,
+                backgroundColor = DeepBlue,
+                viewModel = viewModel
+            )
 
         }
                 if (viewModel.state.isLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
                 viewModel.state.error?.let { error ->
