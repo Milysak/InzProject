@@ -55,8 +55,8 @@ fun WeatherForecast(
                         HourlyWeatherDisplay(
                             weatherData = weatherData,
                             modifier = Modifier
-                                .height(100.dp)
-                                .width(85.dp)
+                                .height(120.dp)
+                                .width(100.dp)
                                 .padding(end = 5.dp)
                         )
                     }

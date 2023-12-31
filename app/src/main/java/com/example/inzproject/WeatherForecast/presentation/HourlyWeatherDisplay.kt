@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Card
+import androidx.compose.material.Card as Card1
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,14 +31,12 @@ fun HourlyWeatherDisplay(
         )
     }
 
-    Card(
+    Card1(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.125f),
-        ),
+            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.125f),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(vertical = 5.dp),
+            modifier = Modifier.fillMaxSize().padding(vertical = 7.5.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -50,7 +49,7 @@ fun HourlyWeatherDisplay(
             Image(
                 painter = painterResource(id = weatherData.weatherType.iconRes),
                 contentDescription = null,
-                modifier = Modifier.width(30.dp)
+                modifier = Modifier.size(40.dp)
             )
             Text(
                 text = FormatOfTheTime,

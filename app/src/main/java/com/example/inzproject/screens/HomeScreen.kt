@@ -102,7 +102,8 @@ fun HomeScreen(
 
             WeatherCard(
                 state = viewModel.state,
-                backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.125f)
+                backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.125f),
+                modifier = Modifier.height(300.dp)
             )
 
             Spacer(modifier = Modifier.height(5.dp))

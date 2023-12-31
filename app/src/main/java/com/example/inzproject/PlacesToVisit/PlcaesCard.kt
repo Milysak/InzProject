@@ -88,7 +88,7 @@ fun PlaceListItem(place: PlaceClass,viewModel: PlacesViewModel) {
         Column {
 
             Divider(
-                color = MaterialTheme.colorScheme.primary.copy(0.25f)
+                color = MaterialTheme.colorScheme.onBackground.copy(0.2f)
             )
 
             Row(Modifier.clickable { /* Handle click if needed */ }) {
@@ -129,7 +129,10 @@ fun PlaceListItem(place: PlaceClass,viewModel: PlacesViewModel) {
                         )
                     }
 
-                    Spacer(modifier = Modifier.size(10.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .size(10.dp)
+                    )
 
                     Row(
                         horizontalArrangement = Arrangement.Center,
@@ -152,10 +155,6 @@ fun PlaceListItem(place: PlaceClass,viewModel: PlacesViewModel) {
                     }
                 }
             }
-
-            Divider(
-                color = MaterialTheme.colorScheme.primary.copy(0.25f)
-            )
         }
     }
         }

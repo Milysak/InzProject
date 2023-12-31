@@ -3,10 +3,15 @@ import android.graphics.Paint.Align
 //import androidx.compose.material3.icons.filled.*
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.toggleable
 //import androidx.compose.foundation.layout.BoxScopeInstance.align
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
@@ -33,6 +38,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +67,11 @@ fun LikeToVisitScreen(viewModel: PlacesViewModel = hiltViewModel()) {
     var active by remember { mutableStateOf(false) }
     var items = remember {
         mutableStateListOf("Gliwice")
+    }
+
+    val listOfFilters: List<String> = listOf("Wszystkie", "Ulubione")
+    var currentSelection by remember {
+        mutableStateOf(listOfFilters[0])
     }
 
     var switchState by remember { mutableStateOf(false) }
@@ -141,7 +152,10 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                         Box(
                             modifier = Modifier
                                 .size(55.dp)
-                                .background(androidx.compose.material3.MaterialTheme.colorScheme.primary, shape = CircleShape),
+                                .background(
+                                    androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                                    shape = CircleShape
+                                ),
 
                             contentAlignment = Alignment.Center
                         ) {
@@ -309,9 +323,21 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                         }*/
                     }
 
-                    Spacer(modifier = Modifier.height(5.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .height(15.dp)
+                    )
 
-                    Row(
+                    MultiToggleButton(
+                        currentSelection = currentSelection,
+                        toggleStates = listOfFilters,
+                        onToggleChange = { state ->
+                            currentSelection = state
+                            switchState = state != listOfFilters[0]
+                        }
+                    )
+
+                    /*Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.CenterHorizontally),
@@ -342,15 +368,15 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                             contentDescription = null,
                             tint = Color.Red.copy(alpha = 0.75f)
                         )
-                    }
+                    }*/
 
                     Row(
                         modifier = Modifier
                             .background(
                                 createGradientBrush(
                                     listOf(
-                                        MaterialTheme.colorScheme.background,
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.125f)
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.125f),
+                                        MaterialTheme.colorScheme.background
                                     )
                                 )
                             )
@@ -393,6 +419,60 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
             }
         }
 
+
+@Composable
+fun MultiToggleButton(
+    currentSelection: String,
+    toggleStates: List<String>,
+    onToggleChange: (String) -> Unit
+) {
+    val selectedTint = MaterialTheme.colorScheme.primary
+    val unselectedTint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+
+    Row(modifier = Modifier
+        .height(45.dp)
+        .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        toggleStates.forEachIndexed { _, toggleState ->
+            val isSelected = currentSelection.lowercase() == toggleState.lowercase()
+            val color by animateColorAsState(
+                targetValue = if (isSelected) selectedTint else unselectedTint,
+                animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+            )
+            val textBold = if (isSelected) FontWeight.Bold else FontWeight.Normal
+
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(45.dp)
+                    .background(color.copy(alpha = 0.1f))
+                    .toggleable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        value = isSelected,
+                        enabled = true,
+                        onValueChange = { selected ->
+                            if (selected) {
+                                onToggleChange(toggleState)
+                            }
+                        }
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                androidx.compose.material3.Text(
+                    toggleState.uppercase(),
+                    color = color,
+                    modifier = Modifier.padding(4.dp),
+                    fontWeight = textBold
+                )
+            }
+
+        }
+    }
+}
 
 @Composable
 fun OpenFilterDialog(isDialogVisible: Boolean, onClose: () -> Unit, placesViewModel: PlacesViewModel) {

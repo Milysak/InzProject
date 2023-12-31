@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.*
 //import androidx.compose.foundation.layout.BoxScopeInstance.align
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +30,12 @@ import kotlin.math.roundToInt
 import com.example.inzproject.WeatherForecast.presentation.ui.theme.DarkBlue
 import androidx.compose.material.Card as Card1
 import androidx.compose.material.*
+import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialogDefaults.containerColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.ui.text.toUpperCase
+import com.example.inzproject.components.FlipCard
 
 //tu znajduję się duża główna karta z pogodą z obecnej chwili
 @Composable
@@ -45,104 +47,149 @@ fun WeatherCard(
 
 //var data : WeatherData
     val context = LocalContext.current
-    var cityoflocalization = state.city
-    cityoflocalization = cityoflocalization[0].uppercase() + cityoflocalization.drop(1)
+    var cityOfLocalization = state.city
+    cityOfLocalization = cityOfLocalization[0].uppercase() + cityOfLocalization.drop(1)
 
     state.weatherInfo?.currentWeatherData?.let { data ->
 
+        FlipCard(
+            frontCard = {
+                FrontCard(
+                    modifier = modifier,
+                    data = data,
+                    cityOfLocalization = cityOfLocalization,
+                    backgroundColor = backgroundColor
+                )
+            },
+            backCard = {
+                BackCard(
+                    modifier = modifier,
+                    data = data,
+                    backgroundColor = backgroundColor
+                )
+            }
+        )
+    }
+}
 
-        Card1(
-            shape = RoundedCornerShape(10.dp),
-            backgroundColor = backgroundColor,
-            modifier = modifier.padding(10.dp),
+@Composable
+fun FrontCard(
+    modifier: Modifier,
+    data: WeatherData,
+    cityOfLocalization: String,
+    backgroundColor: Color
+) {
+    Card1(
+        shape = RoundedCornerShape(10.dp),
+        backgroundColor = backgroundColor,
+        modifier = modifier
+            .fillMaxSize()
+            .padding(10.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Dzisiaj ${
+                    data.time.format(
+                        DateTimeFormatter.ofPattern("HH:mm")
+                    )
+                }",
+                modifier = Modifier.align(Alignment.End),
+                color = Color.White
+            )
 
+            Spacer(modifier = Modifier.height(5.dp))
 
-            ) {
+            Text(
+                text = cityOfLocalization,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                color = Color.White,
+                style = TextStyle(fontSize = 30.sp)
 
+            )
 
-            Column(
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Image(
+                painter = painterResource(id = data.weatherType.iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(80.dp)
+            )
+
+            Text(
+                text = "${data.temperatureCelsius}°C",
+                fontSize = 40.sp,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+fun BackCard(
+    modifier: Modifier,
+    data: WeatherData,
+    backgroundColor: Color
+) {
+    val scale = 1.5f
+
+    Card1(
+        shape = RoundedCornerShape(10.dp),
+        backgroundColor = backgroundColor,
+        modifier = modifier.padding(10.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                Text(
-                    text = "Today ${
-                        data.time.format(
-                            DateTimeFormatter.ofPattern("HH:mm")
-                        )
-                    }",
-                    modifier = Modifier.align(Alignment.End),
-                    color = Color.White
-                )
-
-                Spacer(modifier = Modifier.height(5.dp))
-
-                Text(
-                    text = cityoflocalization,
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    color = Color.White,
-                    style = TextStyle(fontSize = 30.sp)
-
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Image(
-                    painter = painterResource(id = data.weatherType.iconRes),
-                    contentDescription = null,
-                    modifier = Modifier.size(100.dp)
-                )
-
-                Text(
-                    text = "${data.temperatureCelsius}°C",
-                    fontSize = 40.sp,
-                    color = Color.White
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                /*Text(
-                    text = data.weatherType.weatherDescription,
-                    fontSize = 20.sp,
-                    color = Color.White
-                )*/
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    //  modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    modifier = Modifier.padding(bottom = 15.dp)
+                    .padding(bottom = 15.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
 
-                    WeatherDataDisplay(
-                        value = data.windSpeed.roundToInt(),
-                        unit = "km/h",
-                        icon = ImageVector.vectorResource(id = R.drawable.ic_wind),
-                        iconTint = Color.White,
-                        textStyle = TextStyle(color = Color.White)
-                    )
+                WeatherDataDisplay(
+                    value = data.windSpeed.roundToInt(),
+                    unit = " km/h",
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_wind),
+                    iconTint = Color.White,
+                    textStyle = TextStyle(color = Color.White),
+                    scale = scale
+                )
 
 
-                    WeatherDataDisplay(
-                        value = data.pressure.roundToInt(),
-                        unit = "hpa",
-                        icon = ImageVector.vectorResource(id = R.drawable.ic_pressure),
-                        iconTint = Color.White,
-                        textStyle = TextStyle(color = Color.White)
-                    )
+                WeatherDataDisplay(
+                    value = data.pressure.roundToInt(),
+                    unit = " hPa",
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_pressure),
+                    iconTint = Color.White,
+                    textStyle = TextStyle(color = Color.White),
+                    scale = scale
+                )
+            }
 
-                    WeatherDataDisplay(
-                        value = data.humidity.roundToInt(),
-                        unit = "%",
-                        icon = ImageVector.vectorResource(id = R.drawable.ic_drop),
-                        iconTint = Color.White,
-                        textStyle = TextStyle(color = Color.White)
-                    )
-
-                }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                WeatherDataDisplay(
+                    value = data.humidity.roundToInt(),
+                    unit = " %",
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_drop),
+                    iconTint = Color.White,
+                    textStyle = TextStyle(color = Color.White),
+                    scale = scale
+                )
             }
         }
     }

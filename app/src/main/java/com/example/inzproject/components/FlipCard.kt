@@ -18,8 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 
+
 @Composable
-fun FlipCard() {
+fun FlipCard(
+    modifier: Modifier = Modifier,
+    frontCard: @Composable() (() -> Unit),
+    backCard: @Composable() (() -> Unit)
+) {
     var rotated by remember { mutableStateOf(false) }
 
     val rotation by animateFloatAsState(
@@ -65,7 +70,7 @@ fun FlipCard() {
                         rotationY = rotation
                     }
                 ) {
-                    if (rotated) WeatherBackCard() else WeatherFrontCard()
+                    if (rotated) backCard() else frontCard()
                 }
             }
         }
