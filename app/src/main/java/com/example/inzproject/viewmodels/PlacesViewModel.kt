@@ -5,6 +5,8 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ZoomOutMap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,6 +18,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.inzproject.PlacesToVisit.*
 import com.example.inzproject.PlacesToVisit.ROOM.PlaceDao
 import com.example.inzproject.PlacesToVisit.Repository.*
+import com.example.inzproject.data.dataclasses.PlaceType
 //import com.example.inzproject.WeatherForecast.domain.location.LocationTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 //import io.ktor.client.*
@@ -43,13 +46,13 @@ class PlacesViewModel @Inject constructor(private val placeDao: PlaceDao, privat
 
     var filterKeyword by mutableStateOf("")
         private set
-    var filterRadius by mutableStateOf(200)
+    var filterRadius by mutableStateOf(100)
         private set
     var filterMinRating by mutableStateOf(0.0)
         private set
     var filterMaxRating by mutableStateOf(5.0)
         private set
-    var filterPlaceType by mutableStateOf("restaurant")
+    var filterPlaceType by mutableStateOf(PlaceType(Icons.Default.ZoomOutMap, "Wszystko", ""))
         private set
 
     var filterLocalization by mutableStateOf("")
@@ -124,7 +127,7 @@ class PlacesViewModel @Inject constructor(private val placeDao: PlaceDao, privat
         minRating: Double,
         maxRating: Double,
         radius: Int,
-        placeType: String
+        placeType: PlaceType
     ) {
         filterKeyword = keyword.text
         filterMinRating = minRating
@@ -277,7 +280,7 @@ if(canfindthelocation){
                  RetrofitClient.placeApi.getPlaces(
                      loc = loc,
                      rad = radius,
-                     type = type,
+                     type = type.id,
                      keyword = keyword,
                      key = key
                  )

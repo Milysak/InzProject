@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
@@ -31,7 +32,7 @@ fun MapSearchBar() {
         Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.55f)
-            .padding(start = 7.dp, end = 7.dp, top = 5.dp)
+            .padding(start = 10.dp, end = 10.dp, top = 12.dp)
     ) {
         DockedSearchBar(
             modifier = Modifier
@@ -40,9 +41,13 @@ fun MapSearchBar() {
             query = text,
             onQueryChange = { text = it },
             onSearch = {
-                if(text !in items) {
+                if (text !in items) {
+                    items.add(0, text)
+                } else {
+                    items.remove(text)
                     items.add(0, text)
                 }
+
                 active = false
                 text = ""
                        },
@@ -82,21 +87,28 @@ fun MapSearchBar() {
                            }
             },
         ) {
-            items.forEach {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(all = 15.dp)
-                        .clickable {
-                            text = it
-                        }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize(),
+            ) {
+                items(
+                    items.filter { item -> text.uppercase() in item.uppercase() }
                 ) {
-                    Icon(
-                        modifier = Modifier.padding(end = 14.dp),
-                        imageVector = Icons.Default.History,
-                        contentDescription = "History Icon"
-                    )
-                    Text(text = it)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(all = 15.dp)
+                            .clickable {
+                                text = it
+                            }
+                    ) {
+                        Icon(
+                            modifier = Modifier.padding(end = 14.dp),
+                            imageVector = Icons.Default.History,
+                            contentDescription = "History Icon"
+                        )
+                        Text(text = it)
+                    }
                 }
             }
         }

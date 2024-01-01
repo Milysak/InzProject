@@ -83,7 +83,7 @@ fun PlacesCard(
                         ) { clickedPlace ->
 
                             // Create a Uri from an intent string. Use the result to create an Intent.
-                            val gmmIntentUri = Uri.parse("geo:${clickedPlace.latitute},${clickedPlace.longitute}")
+                            val gmmIntentUri = Uri.parse("geo:0,0?q=${clickedPlace.name}")
 
                             // Create an Intent from gmmIntentUri. Set the action to ACTION_VIEW
                             val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
@@ -137,6 +137,8 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (P
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
+                            modifier = Modifier
+                                .padding(end = 50.dp),
                             color = MaterialTheme.colorScheme.onBackground,
                             text = place.name,
                             style = typography1.h6
@@ -153,8 +155,6 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (P
                             vicinity = place.vicinity,
                             rating = place.rating,
                             icon = place.icon,
-                            longitute = place.longitute,
-                            latitute = place.latitute
                         )
 
                         ClickableHeart(newplace, viewModel)

@@ -26,9 +26,6 @@ data class PlaceClass(
 
     val vicinity: String,
     val icon: String,
-    val longitute: Float,
-    val latitute: Float
-
 
 )
 

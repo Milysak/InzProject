@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,8 +29,12 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SliderColors
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,9 +59,11 @@ import com.example.inzproject.PlacesToVisit.ROOM.FavouritePlacesDatabase
 import com.example.inzproject.R
 
 import com.example.inzproject.WeatherForecast.presentation.ui.theme.DeepBlue
+import com.example.inzproject.data.dataclasses.PlaceType
 import com.example.inzproject.helpfunctions.createGradientBrush
 import com.example.inzproject.viewmodels.PlacesViewModel
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.google.maps.android.ktx.utils.heatmaps.heatmapTileProviderWithWeightedData
 import kotlinx.coroutines.launch
 
 //import kotlin.coroutines.jvm.internal.CompletedContinuation.context
@@ -385,9 +392,12 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
 
             if (isFilterDialogVisible) {
                 OpenFilterDialog(
-                   isDialogVisible = isFilterDialogVisible,
-                    onClose = { isFilterDialogVisible = false },
-                    viewModel
+                    context = context,
+                    isDialogVisible = isFilterDialogVisible,
+                    onClose = {
+                        isFilterDialogVisible = false
+                              },
+                    placesViewModel = viewModel
                 )
 
             }
@@ -430,7 +440,8 @@ fun MultiToggleButton(
     val selectedTint = MaterialTheme.colorScheme.primary
     val unselectedTint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
 
-    Row(modifier = Modifier
+    Row(
+        modifier = Modifier
         .height(45.dp)
         .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -476,31 +487,33 @@ fun MultiToggleButton(
 }
 
 @Composable
-fun OpenFilterDialog(isDialogVisible: Boolean, onClose: () -> Unit, placesViewModel: PlacesViewModel) {
+fun OpenFilterDialog(context: Context, isDialogVisible: Boolean, onClose: () -> Unit, placesViewModel: PlacesViewModel) {
     if (isDialogVisible) {
         AlertDialog(
+            backgroundColor = MaterialTheme.colorScheme.background,
             onDismissRequest = onClose,
             title = {
-                Text("Filtrowanie")
+                Text("")
             },
             text = {
-                FiltersForm(placesViewModel =placesViewModel
-
+                FiltersForm(
+                    context = context,
+                    placesViewModel = placesViewModel,
+                    onApply = {
+                        onClose()
+                    }
                 )
             },
             confirmButton = {
-                Button(
-                    onClick = onClose
-                ) {
-                    Text("Zamknij")
-                }
+                // Null
             }
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FiltersForm(placesViewModel: PlacesViewModel) {
+fun FiltersForm(context: Context, placesViewModel: PlacesViewModel, onApply: () -> Unit) {
     var placeType by remember { mutableStateOf(placesViewModel.filterPlaceType) }
     var numericRange by remember { mutableStateOf(placesViewModel.filterRadius) }
     var minRating by remember { mutableStateOf(placesViewModel.filterMinRating) }
@@ -512,92 +525,272 @@ fun FiltersForm(placesViewModel: PlacesViewModel) {
             .padding(16.dp)
             .fillMaxWidth()
     ) {
+        
         // Pole tekstowe na wpisanie typu miejsca
-        TextField(
+        /*androidx.compose.material3.OutlinedTextField(
             value = placeType,
             onValueChange = {
                 placeType = it
             },
-            label = { Text("Type of place") },
+            label = {
+                Text(
+                    "Typ miejsca...",
+                        color = MaterialTheme.colorScheme.onBackground
+                     )
+                    },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp)
+                .padding(bottom = 8.dp),
+            singleLine = true
         )
+*/
+        val options = listOf(
+            PlaceType(Icons.Default.ZoomOutMap, "Wszystko", ""),
+            PlaceType(Icons.Default.Restaurant, "Restauracja", "restaurant"),
+            PlaceType(Icons.Default.ShoppingBasket, "Supermarket", "supermarket"),
+            PlaceType(Icons.Default.WineBar, "Klub", "night_club"),
+            PlaceType(Icons.Default.LocalActivity, "Atrakcja Turystyczna", "tourist_attraction"),
+            PlaceType(Icons.Default.Train, "Stacja Kolejowa", "train_station"),
+            PlaceType(Icons.Default.LocalTaxi, "Postój Taksówek", "taxi_stand"),
+            PlaceType(Icons.Default.Subway, "Stacja Metra", "subway_station"),
+            PlaceType(Icons.Default.Stadium, "Stadion", "stadium"),
+            PlaceType(Icons.Default.LocalParking, "Parking", "parking"),
+            PlaceType(Icons.Default.Museum, "Muzeum", "museum"),
+            PlaceType(Icons.Default.MovieFilter, "Kino", "movie_theater"),
+            PlaceType(Icons.Default.Airlines, "Port Lotniczy", "airport"),
+            PlaceType(Icons.Default.RollerSkating, "Park Rozrywki", "amusement_park"),
+            PlaceType(Icons.Default.FormatPaint, "Galeria Sztuki", "art_gallery"),
+            PlaceType(Icons.Default.Money, "Bankomat", "atm"),
+            PlaceType(Icons.Default.BakeryDining, "Piekarnia", "bakery"),
+            PlaceType(Icons.Default.AttachMoney, "Bank", "bank"),
+            PlaceType(Icons.Default.SportsBar, "Bar", "bar"),
+            PlaceType(Icons.Default.FaceRetouchingNatural, "Salon Piękności", "beauty_salon"),
+            PlaceType(Icons.Default.MenuBook, "Księgarnia", "book_store"),
+            PlaceType(Icons.Default.BlurCircular, "Kręgielnia", "bowling_alley"),
+            PlaceType(Icons.Default.BusAlert, "Przystanek Autobusowy", "bus_station"),
+            PlaceType(Icons.Default.LocalCafe, "Kawiarnia", "cafe"),
+            PlaceType(Icons.Default.LocalFireDepartment, "Obozowisko", "campground"),
+            PlaceType(Icons.Default.CarRental, "Wypożyczalnia Samochodów", "car_rental"),
+            PlaceType(Icons.Default.CarRepair, "Mechanik", "car_repair"),
+            PlaceType(Icons.Default.LocalCarWash, "Myjnia", "car_wash"),
+            PlaceType(Icons.Default.Casino, "Casyno", "casino"),
+            PlaceType(Icons.Default.Store, "Sklep z ubraniami", "clothing_store"),
+            PlaceType(Icons.Default.FoodBank, "Sklep Spożywczy", "convenience_store"),
+            PlaceType(Icons.Default.SentimentVerySatisfied, "Dentysta", "dentist"),
+            PlaceType(Icons.Default.SentimentVerySatisfied, "Dom Handlowy", "department_store"),
+            PlaceType(Icons.Default.MedicalInformation, "Lekarz", "doctor"),
+            PlaceType(Icons.Default.MedicalServices, "Apteka", "drugstore"),
+            PlaceType(Icons.Default.DesktopWindows, "Sklep Elektroniczny", "electronics_store"),
+            PlaceType(Icons.Default.Flag, "Ambasada", "embassy"),
+            PlaceType(Icons.Default.LocalFlorist, "Kwiaciarnia", "florist"),
+            PlaceType(Icons.Default.LocalGasStation, "Stacja Paliw", "gas_station"),
+            PlaceType(Icons.Default.FitnessCenter, "Siłownia", "gym"),
+            PlaceType(Icons.Default.ContentCut, "Pielęgnacja włosów", "hair_care"),
+            PlaceType(Icons.Default.Hardware, "Sklep z narzędziami", "hardware_store"),
+            PlaceType(Icons.Default.LocalHospital, "Szpital", "hospital"),
+            PlaceType(Icons.Default.VolunteerActivism, "Agencja Ubezpieczeniowa", "insurance_agency"),
+            PlaceType(Icons.Default.AutoAwesome, "Jubiler", "jewelry_store"),
+            )
+        var expanded by remember { mutableStateOf(false) }
 
-        // Pole do wprowadzenia zasięgu liczbowego
-        OutlinedTextField(
-            value = numericRange.toString(),
-            onValueChange = {
-                numericRange = it.toIntOrNull() ?: 1
-            },
-            label = { Text("Numeric Range") },
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
+        androidx.compose.material3.ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {
+                    expanded = !expanded
+                 }
         ) {
-            // Pole tekstowe na wpisanie minimalnej oceny
-            OutlinedTextField(
-                value = minRating.toString(),
+            TextField(
+                // The `menuAnchor` modifier must be passed to the text field for correctness.
+                modifier = Modifier.menuAnchor(),
+                readOnly = true,
+                value = placeType.name,
                 onValueChange = {
-                    if (it.isNotBlank()) {
-                        minRating = it.toDoubleOrNull()?.coerceIn(0.0, 5.0) ?: 0.0
-                    }
 
                 },
-                label = { Text("Min Rating") },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 4.dp)
-            )
-
-            // Pole tekstowe na wpisanie maksymalnej oceny
-            OutlinedTextField(
-                value = maxRating.toString(),
-                onValueChange = {
-                    if (it.isNotBlank()) {
-                        maxRating = it.toDoubleOrNull()?.coerceIn(0.0, 5.0) ?: 5.0
-                    }
-                                //   maxRating = it.toDoubleOrNull()?: 5.0
-
+                leadingIcon = {
+                    Icon(
+                        imageVector = placeType.icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
                 },
-                label = { Text("Max Rating") },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 4.dp)
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(),
             )
+            ExposedDropdownMenu(
+                modifier = Modifier.fillMaxHeight(0.3f),
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                options.forEach { selectionOption ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                selectionOption.name,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                               },
+                        leadingIcon = {
+                                      Icon(
+                                          imageVector = selectionOption.icon,
+                                          contentDescription = null,
+                                          tint = MaterialTheme.colorScheme.onBackground
+                                      )
+                        },
+                        onClick = {
+                            placeType = selectionOption
+                            expanded = false
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                    )
+                }
+            }
         }
 
+        Spacer(
+            modifier = Modifier
+                .height(20.dp)
+        )
+
         // Pole tekstowe na wpisanie tekstu
-        TextField(
+        androidx.compose.material3.OutlinedTextField(
             value = keyword,
             onValueChange = {
                 keyword = it
             },
-            label = { Text("Keyword") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-        )
-
-        // Przycisk do zastosowania filtrów
-        Button(
-            onClick = {
-                placesViewModel.setFilters(keyword = keyword, minRating = minRating, maxRating = maxRating, radius = numericRange, placeType = placeType)
+            label = {
+                Text(
+                    "Słowo kluczowe...",
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
+                .padding(bottom = 8.dp),
+            singleLine = true
+        )
+
+        Spacer(
+            modifier = Modifier
+                .height(20.dp)
+        )
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Apply Filters")
+            Text(
+                text = "Promień",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+
+            androidx.compose.material3.Slider(
+                modifier = Modifier
+                    .height(20.dp),
+                value = numericRange.toFloat(),
+                onValueChange = { numericRange = it.toInt() },
+                valueRange = 100f..10_000f
+            )
+
+            Text(
+                text = "$numericRange m",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(
+            modifier = Modifier
+                .height(20.dp)
+        )
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Ocena",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+
+            androidx.compose.material3.RangeSlider(
+                modifier = Modifier
+                    .height(20.dp),
+                value = minRating.toFloat()..maxRating.toFloat(),
+                steps = 9,
+                onValueChange = { range ->
+                    minRating = range.start.toDouble()
+                    maxRating = range.endInclusive.toDouble()
+                                },
+                valueRange = 0f..5f,
+                onValueChangeFinished = {
+                    // launch some business logic update with the state you hold
+                    // viewModel.updateSelectedSliderValue(sliderPosition)
+                },
+            )
+
+            Text(
+                text = "od $minRating do $maxRating",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(
+            modifier = Modifier
+                .height(20.dp)
+        )
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            androidx.compose.material3.OutlinedButton(
+                onClick = {
+                    keyword = TextFieldValue("")
+                    minRating = 0.0
+                    maxRating = 5.0
+                    numericRange = 100
+                    placeType = PlaceType(Icons.Default.ZoomOutMap, "Wszystko", "")
+                },
+                modifier = Modifier
+                    .weight(1.0f)
+                    .padding(top = 16.dp, end = 3.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+            ) {
+                Text(
+                    "Reset",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            // Przycisk do zastosowania filtrów
+            androidx.compose.material3.Button(
+                onClick = {
+                    onApply()
+
+                    placesViewModel.setFilters(
+                        keyword = keyword,
+                        minRating = minRating,
+                        maxRating = maxRating,
+                        radius = numericRange,
+                        placeType = placeType
+                    )
+
+                    placesViewModel.getPlacesAsync(context)
+                },
+                modifier = Modifier
+                    .weight(1.0f)
+                    .padding(top = 16.dp, start = 3.dp)
+            ) {
+                Text(
+                    "Zastosuj",
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

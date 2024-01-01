@@ -17,8 +17,5 @@ data class Place(
     val cityName: String,
     val availabilityHours: String,
     val googleNote: Double,
-    val longitute: Float,
-    val latitute: Float
 
-
-    )
+)
