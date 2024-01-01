@@ -406,7 +406,8 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                 context = context,
                 state = viewModel.state,
                 backgroundColor = DeepBlue,
-                viewModel = viewModel
+                viewModel = viewModel,
+                switchState = switchState
             )
 
         }

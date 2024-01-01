@@ -43,12 +43,14 @@ import com.example.inzproject.ui.theme.beigebrown
 import com.example.inzproject.ui.theme.graySurface
 import com.example.inzproject.ui.theme.typography1
 import com.example.inzproject.viewmodels.PlacesViewModel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun PlacesCard(
     context: Context,
     state: PlaceState,
+    switchState: Boolean,
     backgroundColor: Color,
     modifier: Modifier = Modifier,
     viewModel: PlacesViewModel
@@ -57,6 +59,18 @@ fun PlacesCard(
     println(state.PlaceInfo?.results)
 
     val localeContext = LocalContext.current
+    val database = FavouritePlacesDatabase.getInstance(localeContext)
+
+    val coroutineScope = rememberCoroutineScope()
+
+    var listOfLoved: List<PlaceClass>? = null
+
+    if (switchState) {
+        coroutineScope.launch {
+            listOfLoved = database.placeDao().getAllPlaces()
+            println(database.placeDao().getAllPlaces())
+        }
+    }
 
     state.PlaceInfo?.results.let { data ->
         Box(
@@ -70,8 +84,10 @@ fun PlacesCard(
                     .fillMaxSize(),
             ) {
                 items(
-                    items = data ?: emptyList()
+                    items = if (!switchState) { data ?: emptyList() } else { listOfLoved ?: emptyList() }
                 ) { place ->
+
+                    println(place.name)
 
                     if (place.rating != null && place.rating >= viewModel.filterMinRating && place.rating <= viewModel.filterMaxRating) {
                         PlaceListItem(
@@ -214,10 +230,10 @@ fun ClickableHeart(
     viewModel: PlacesViewModel
 ) {
     var isFavourite by remember{ mutableStateOf(false) }
-    val context = LocalContext.current
-    val database = FavouritePlacesDatabase.getDatabase(context)
-    val placeDao = database?.placeDao()
+
     val coroutineScope = rememberCoroutineScope()
+
+    val database = FavouritePlacesDatabase.getInstance(LocalContext.current)
 
     var Message: String
     var heartIcon : ImageVector
@@ -240,18 +256,22 @@ fun ClickableHeart(
                     coroutineScope.launch {
                         println(newplace.name)
 
-                        viewModel.savePlace(newplace)
+                        database.placeDao().insertPlace(newplace)
+                        //viewModel.savePlace(newplace)
                         //  placeDao.insertPlace(newplace)
                     }
                 } else {
                     coroutineScope.launch {
+
+                        database.placeDao().deletePlace(newplace)
+
+                        //viewModel.deletePlace(newplace)
                         //   println(newplace.placeName)
                         //   placeDao.deletePlaceByNameAndCity(newplace.placeName, newplace.cityName)
                     }
 
                 }
                 isFavourite = !isFavourite
-
             }
             .padding(4.dp),
         tint = MaterialTheme.colorScheme.onBackground

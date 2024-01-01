@@ -156,7 +156,13 @@ class PlacesViewModel @Inject constructor(private val placeDao: PlaceDao, privat
 
     fun savePlace(place: PlaceClass) {
         viewModelScope.launch {
-            placeDao.insertPlace(place)
+            placeDao.insertPlace(placeclass = place)
+        }
+    }
+
+    fun deletePlace(place: PlaceClass) {
+        viewModelScope.launch {
+            placeDao.deletePlace(placeclass = place)
         }
     }
 fun setstate(placesResponse: PlacesResponse)

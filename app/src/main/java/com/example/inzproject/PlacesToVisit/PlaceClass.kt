@@ -1,5 +1,9 @@
 package com.example.inzproject.PlacesToVisit
 
+import android.os.Parcel
+import android.os.Parcelable
+import androidx.annotation.NonNull
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
@@ -11,12 +15,17 @@ data class PlacesResponse(
     val status: String
 )
 
-@Entity(tableName = "favouriteplaces")
+@Entity(tableName = "love_places")
 data class PlaceClass(
 
     @PrimaryKey
+    @ColumnInfo(name = "place_id")
     val place_id: String,
+
+    @ColumnInfo(name = "name")
     val name: String,
+
+    @ColumnInfo(name = "rating")
     val rating: Double?,
 
  //  val opening_hours: OpeningHours?,
@@ -24,7 +33,10 @@ data class PlaceClass(
 
    //   val types: List<String>,
 
+    @ColumnInfo(name = "vicinity")
     val vicinity: String,
+
+    @ColumnInfo(name = "icon")
     val icon: String,
 
 )

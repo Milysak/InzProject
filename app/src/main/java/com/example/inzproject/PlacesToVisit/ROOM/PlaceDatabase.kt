@@ -8,40 +8,32 @@ import androidx.room.TypeConverters
 import com.example.inzproject.PlacesToVisit.Place
 import com.example.inzproject.PlacesToVisit.PlaceClass
 
-@Database(entities = [PlaceClass::class], version = 3, exportSchema = false)
+@Database(entities = [PlaceClass::class], version = 1, exportSchema = false)
 abstract class FavouritePlacesDatabase : RoomDatabase() {
 
     abstract fun placeDao(): PlaceDao
 
     companion object {
+
         @Volatile
         private var INSTANCE: FavouritePlacesDatabase? = null
 
+        fun getInstance(context: Context): FavouritePlacesDatabase {
+            // only one thread of execution at a time can enter this block of code
+            synchronized(this) {
+                var instance = INSTANCE
 
-//        fun getInstance(context: Context): FavouritePlacesDatabase? {
-//
-//            if(INSTANCE==null) {
-//
-//             INSTANCE = Room.databaseBuilder(
-//                context,
-//                FavouritePlacesDatabase::class.java,
-//                "favouriteplaces")
-//                 .fallbackToDestructiveMigration()
-//                 .build()
-//
-//            }
-//return INSTANCE
-//        }
-
-            fun getDatabase(context: Context): FavouritePlacesDatabase? {
-                return INSTANCE ?: synchronized(this) {
-                    val instance = Room.databaseBuilder(
+                if (instance == null) {
+                    instance = Room.databaseBuilder(
                         context.applicationContext,
                         FavouritePlacesDatabase::class.java,
-                        "favouriteplaces"
-                    ).build()
+                        "love_places"
+                    ).fallbackToDestructiveMigration()
+                        .build()
+
                     INSTANCE = instance
-                instance
+                }
+                return instance
             }
         }
     }

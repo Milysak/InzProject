@@ -2,6 +2,7 @@ package com.example.inzproject.PlacesToVisit.ROOM
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -15,12 +16,15 @@ interface PlaceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlace(placeclass: PlaceClass)
 
-    @Query("SELECT * FROM favouriteplaces")
+    @Delete
+    suspend fun deletePlace(placeclass: PlaceClass)
+
+    @Query("SELECT * FROM love_places")
     suspend fun getAllPlaces(): List<PlaceClass>
 
-    @Query("DELETE FROM favouriteplaces WHERE place_id = :placeId")
+    @Query("DELETE FROM love_places WHERE place_id = :placeId")
     suspend fun deletePlaceById(placeId: String)
 
-    @Query("DELETE FROM favouriteplaces")
+    @Query("DELETE FROM love_places")
     suspend fun clearAllPlaces()
 }
