@@ -43,20 +43,29 @@ import com.example.inzproject.WeatherForecast.presentation.WeatherCard
 import com.example.inzproject.WeatherForecast.presentation.WeatherForecast
 import com.example.inzproject.WeatherForecast.presentation.ui.theme.DarkBlue
 import com.example.inzproject.WeatherForecast.presentation.ui.theme.DeepBlue
+import com.example.inzproject.components.MyDatePickerDialog
 import com.example.inzproject.viewmodels.MainViewModel
 import com.example.inzproject.viewmodels.WeatherViewModel
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.util.*
 //import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: WeatherViewModel = hiltViewModel(),
 ) {
-
-
     lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+
+    var city by remember {
+        mutableStateOf("")
+    }
+
     var selectedDay by remember { mutableStateOf(0) }
+
+    var datePickerDialogVisibility by remember {
+        mutableStateOf(false)
+    }
 
     val context = LocalContext.current
     // val newLocationTracker = LocationTracker()
@@ -66,6 +75,32 @@ fun HomeScreen(
             var res = viewModel.loadWeatherInfo(context = context, "mylocation", selectedDay)
 
 
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        if (datePickerDialogVisibility) {
+            MyDatePickerDialog(
+                weatherViewModel = viewModel,
+                selectedDay = selectedDay,
+                onSelectedDayChange = { newSelectedDay ->
+                    selectedDay = newSelectedDay
+
+                    if (city == "" || city == null) {
+                        city = "mylocation"
+                    }
+
+                    viewModel.settext(city)
+
+                    viewModel.loadWeatherInfo(context = context, city, selectedDay)
+                },
+                onDismiss = {
+                    datePickerDialogVisibility = false
+                }
+            )
         }
     }
 
@@ -94,7 +129,19 @@ fun HomeScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
 
-            showDatePicker(context, minDate, maxDate,viewModel, selectedDay) { newSelectedDay ->
+            showDatePicker(
+                context,
+                minDate,
+                maxDate,
+                viewModel,
+                selectedDay,
+                onCalendarClick = {
+                    datePickerDialogVisibility = true
+                },
+                onSearchedCity = {
+                    city = it
+                }
+            ) { newSelectedDay ->
                 selectedDay = newSelectedDay // Update the selectedDay state
             }
 
@@ -132,7 +179,17 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weatherViewModel: WeatherViewModel,selectedDay:Int,  onSelectedDayChange: (Int) -> Unit) {
+fun showDatePicker(
+    context: Context,
+    minDate: Calendar,
+    maxDate: Calendar,
+    weatherViewModel: WeatherViewModel,
+    selectedDay: Int,
+    onCalendarClick: () -> Unit,
+    onSearchedCity: (String) -> Unit,
+    onSelectedDayChange: (Int) -> Unit
+)
+{
     val currentDate = remember { Calendar.getInstance() }
     val selectedDate = remember { mutableStateOf(currentDate) }
     var cityName by remember { mutableStateOf("") }
@@ -143,13 +200,13 @@ fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weathe
         mutableStateListOf("Gliwice")
     }
 
+    var city = ""
     var isSearching by remember { mutableStateOf(false) }
-    var city:String=""
     var citycoordinates : String = ""
     val datePickerDialog = remember {
         DatePickerDialog(
             context,
-            { dP: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+            { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
                 val selected = Calendar.getInstance().apply {
                     set(year, month, dayOfMonth)
                 }
@@ -195,7 +252,7 @@ fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weathe
             ) {
                 IconButton(
                     onClick = {
-                        datePickerDialog.show()
+                        onCalendarClick()
                     },
                 ) {
                     Icon(
@@ -231,6 +288,7 @@ fun showDatePicker(context: Context, minDate: Calendar, maxDate: Calendar,weathe
 
                         active = false
                         textState = ""
+                        onSearchedCity(city)
                     },
                     active = active,
                     onActiveChange = {

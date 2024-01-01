@@ -16,10 +16,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.FindReplace
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
@@ -121,15 +118,13 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (P
             )
 
             Row(
-                Modifier
-                    .clickable {
-                        onItemClick(place)
-                    }
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(
                     modifier = Modifier
                         .padding(8.dp)
-                        .fillMaxWidth()
+                        .weight(0.8f)
                         .align(Alignment.CenterVertically)
                 ) {
                     Row(
@@ -143,21 +138,6 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (P
                             text = place.name,
                             style = typography1.h6
                         )
-
-                        Spacer(
-                            modifier = Modifier
-                                .weight(1f)
-                        )
-
-                        val newplace = PlaceClass(
-                            place_id = place.place_id,
-                            name = place.name,
-                            vicinity = place.vicinity,
-                            rating = place.rating,
-                            icon = place.icon,
-                        )
-
-                        ClickableHeart(newplace, viewModel)
                     }
 
                     Row {
@@ -196,6 +176,32 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (P
                         )
                     }
                 }
+
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                ) {
+                    val newplace = PlaceClass(
+                        place_id = place.place_id,
+                        name = place.name,
+                        vicinity = place.vicinity,
+                        rating = place.rating,
+                        icon = place.icon,
+                    )
+
+                    ClickableHeart(newplace, viewModel)
+
+                    Icon(
+                        imageVector = Icons.Filled.Map,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .clickable {
+                                onItemClick(place)
+                            }
+                            .padding(4.dp),
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
             }
         }
     }
@@ -203,14 +209,17 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (P
 
 
 @Composable
-fun ClickableHeart(newplace:PlaceClass,viewModel: PlacesViewModel){
+fun ClickableHeart(
+    newplace: PlaceClass,
+    viewModel: PlacesViewModel
+) {
     var isFavourite by remember{ mutableStateOf(false) }
     val context = LocalContext.current
     val database = FavouritePlacesDatabase.getDatabase(context)
     val placeDao = database?.placeDao()
     val coroutineScope = rememberCoroutineScope()
 
-    var Message:String
+    var Message: String
     var heartIcon : ImageVector
 
 

@@ -836,8 +836,6 @@ fun RangeInputField(range: IntRange, onRangeChange: (IntRange) -> Unit) {
                 .padding(start = 4.dp)
         )
     }
-
-
 }
 
 
