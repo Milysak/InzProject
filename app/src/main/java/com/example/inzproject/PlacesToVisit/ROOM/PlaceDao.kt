@@ -16,6 +16,8 @@ interface PlaceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlace(placeclass: PlaceClass)
 
+
+
     @Delete
     suspend fun deletePlace(placeclass: PlaceClass)
 
@@ -27,4 +29,7 @@ interface PlaceDao {
 
     @Query("DELETE FROM love_places")
     suspend fun clearAllPlaces()
+
+    @Query("SELECT EXISTS (SELECT 1 FROM love_places WHERE place_id = :placeId)")
+    suspend fun checkIfPlaceExists(placeId: String): Boolean
 }

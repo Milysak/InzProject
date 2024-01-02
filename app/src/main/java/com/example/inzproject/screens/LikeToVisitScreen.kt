@@ -396,7 +396,7 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                     isDialogVisible = isFilterDialogVisible,
                     onClose = {
                         isFilterDialogVisible = false
-                              },
+                    },
                     placesViewModel = viewModel
                 )
 
@@ -411,24 +411,39 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
             )
 
         }
-                if (viewModel.state.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                viewModel.state.error?.let { error ->
-                    androidx.compose.material.Text(
-                        text = error,
-                        color = Color.Red,
-                        textAlign = TextAlign.Center,
-                        // modifier = Modifier.align(Alignment.Center)
-                    )
+        if (viewModel.state.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        if (switchState == false) {
+            viewModel.state.error?.let { error ->
+                androidx.compose.material.Text(
+                    text = error,
+                    color = Color.Red,
+                    textAlign = TextAlign.Center,
+                    // modifier = Modifier.align(Alignment.Center)
+                )
 
-
-                }
 
             }
+        }
+
+        if (switchState==false) {
+            viewModel.state.error?.let { error ->
+                androidx.compose.material.Text(
+                    text = error,
+                    color = Color.Red,
+                    textAlign = TextAlign.Center,
+                    // modifier = Modifier.align(Alignment.Center)
+                )
+
+
+            }
+
+        }
+    }
         }
 
 

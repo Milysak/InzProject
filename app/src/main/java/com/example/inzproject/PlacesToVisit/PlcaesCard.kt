@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
@@ -95,12 +96,17 @@ fun PlacesCard(
                     items = data ?: emptyList()
                 ) { place ->
 
+//                    var IsInLoveList = false
+//                    coroutineScope.launch(Dispatchers.IO) {
+//                         IsInLoveList = database.placeDao().checkIfPlaceExists(place.place_id)
+//                    }
                     println(place.name)
 
                     if (place.rating != null && place.rating >= viewModel.filterMinRating && place.rating <= viewModel.filterMaxRating) {
                         PlaceListItem(
                             place = place,
-                            viewModel = viewModel
+                            viewModel = viewModel,
+
                         ) { clickedPlace ->
 
                             // Create a Uri from an intent string. Use the result to create an Intent.
@@ -235,7 +241,8 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (P
 @Composable
 fun ClickableHeart(
     newplace: PlaceClass,
-    viewModel: PlacesViewModel
+    viewModel: PlacesViewModel,
+
 ) {
     var isFavourite by remember{ mutableStateOf(false) }
 
@@ -245,6 +252,10 @@ fun ClickableHeart(
 
     var Message: String
     var heartIcon : ImageVector
+
+
+
+
 
 
     if (isFavourite){
@@ -290,6 +301,7 @@ fun ClickableHeart(
     )
 
 }
+
 
 
 
