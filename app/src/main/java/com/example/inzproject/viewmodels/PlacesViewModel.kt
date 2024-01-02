@@ -16,6 +16,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.inzproject.PlacesToVisit.*
+import com.example.inzproject.PlacesToVisit.ROOM.FavouritePlacesDatabase
 import com.example.inzproject.PlacesToVisit.ROOM.PlaceDao
 import com.example.inzproject.PlacesToVisit.Repository.*
 import com.example.inzproject.data.dataclasses.PlaceType
@@ -35,7 +36,13 @@ import javax.inject.Inject
 import com.example.inzproject.domain.location.LocationTracker
 
 @HiltViewModel
-class PlacesViewModel @Inject constructor(private val placeDao: PlaceDao, private val googlePlacesApi: CordinatesApi, private var locationTracker: LocationTracker,) : ViewModel() {
+class PlacesViewModel @Inject constructor(
+    private val database: FavouritePlacesDatabase,
+    private val placeDao: PlaceDao,
+    private val googlePlacesApi: CordinatesApi,
+    private var locationTracker: LocationTracker
+    ) : ViewModel() {
+
     private val _placesLiveData = MutableLiveData<List<PlaceClass>>()
     val placesLiveData: LiveData<List<PlaceClass>> get() = _placesLiveData
 

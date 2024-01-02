@@ -1,5 +1,6 @@
 package com.example.inzproject.PlacesToVisit.Repository
 
+import com.example.inzproject.PlacesToVisit.PlaceClass
 import com.example.inzproject.PlacesToVisit.PlacesResponse
 
 

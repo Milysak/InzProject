@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.example.inzproject.PlacesToVisit.Place
 import com.example.inzproject.PlacesToVisit.PlaceClass
 
-@Database(entities = [PlaceClass::class], version = 1, exportSchema = false)
+@Database(entities = [PlaceClass::class], version = 3, exportSchema = false)
 abstract class FavouritePlacesDatabase : RoomDatabase() {
 
     abstract fun placeDao(): PlaceDao

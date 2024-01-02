@@ -43,8 +43,7 @@ import com.example.inzproject.ui.theme.beigebrown
 import com.example.inzproject.ui.theme.graySurface
 import com.example.inzproject.ui.theme.typography1
 import com.example.inzproject.viewmodels.PlacesViewModel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 @Composable
 fun PlacesCard(
@@ -61,18 +60,27 @@ fun PlacesCard(
     val localeContext = LocalContext.current
     val database = FavouritePlacesDatabase.getInstance(localeContext)
 
-    val coroutineScope = rememberCoroutineScope()
+    val coroutineScope =  CoroutineScope(Dispatchers.Main)
 
-    var listOfLoved: List<PlaceClass>? = null
-
-    if (switchState) {
-        coroutineScope.launch {
-            listOfLoved = database.placeDao().getAllPlaces()
-            println(database.placeDao().getAllPlaces())
-        }
+    var nullList: List<PlaceClass>? = null
+    var listOfPlaces by remember {
+        mutableStateOf(nullList)
     }
 
-    state.PlaceInfo?.results.let { data ->
+    if (switchState) {
+        coroutineScope.launch(Dispatchers.IO) {
+            /*val list = async { database.placeDao().getAllPlaces() }
+            if (list.await().isEmpty()) println("Pusta baza!") else println("Nie pusta baza!")
+            list.await().forEach {
+                println(it.name)
+            }*/
+            listOfPlaces = database.placeDao().getAllPlaces()
+        }
+    } else {
+        listOfPlaces = state.PlaceInfo?.results
+    }
+
+    listOfPlaces.let { data ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -84,7 +92,7 @@ fun PlacesCard(
                     .fillMaxSize(),
             ) {
                 items(
-                    items = if (!switchState) { data ?: emptyList() } else { listOfLoved ?: emptyList() }
+                    items = data ?: emptyList()
                 ) { place ->
 
                     println(place.name)
@@ -252,18 +260,22 @@ fun ClickableHeart(
         contentDescription = null,
         modifier = Modifier
             .clickable {
-                if (isFavourite) {
+                if (!isFavourite) {
                     coroutineScope.launch {
                         println(newplace.name)
 
-                        database.placeDao().insertPlace(newplace)
+                        database
+                            .placeDao()
+                            .insertPlace(newplace)
                         //viewModel.savePlace(newplace)
                         //  placeDao.insertPlace(newplace)
                     }
                 } else {
                     coroutineScope.launch {
 
-                        database.placeDao().deletePlace(newplace)
+                        database
+                            .placeDao()
+                            .deletePlace(newplace)
 
                         //viewModel.deletePlace(newplace)
                         //   println(newplace.placeName)
