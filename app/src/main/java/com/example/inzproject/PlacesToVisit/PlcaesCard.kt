@@ -56,7 +56,14 @@ fun PlacesCard(
     viewModel: PlacesViewModel
 
 ) {
-    println(state.PlaceInfo?.results)
+
+
+
+
+    var listOfFavouritePlacesID by remember {
+        mutableStateOf<List<String>?>(null)
+    }
+
 
     val localeContext = LocalContext.current
     val database = FavouritePlacesDatabase.getInstance(localeContext)
@@ -68,6 +75,9 @@ fun PlacesCard(
         mutableStateOf(nullList)
     }
 
+
+
+
     if (switchState) {
         coroutineScope.launch(Dispatchers.IO) {
             /*val list = async { database.placeDao().getAllPlaces() }
@@ -76,9 +86,23 @@ fun PlacesCard(
                 println(it.name)
             }*/
             listOfPlaces = database.placeDao().getAllPlaces()
+            listOfFavouritePlacesID = database.placeDao().getIdList()
+
         }
     } else {
-        listOfPlaces = state.PlaceInfo?.results
+
+        coroutineScope.launch(Dispatchers.IO) {
+
+            listOfFavouritePlacesID = database.placeDao().getIdList()
+
+           withContext(Dispatchers.Main) {
+
+
+                listOfPlaces = state.PlaceInfo?.results
+           }
+
+        }
+
     }
 
     listOfPlaces.let { data ->
@@ -100,13 +124,14 @@ fun PlacesCard(
 //                    coroutineScope.launch(Dispatchers.IO) {
 //                         IsInLoveList = database.placeDao().checkIfPlaceExists(place.place_id)
 //                    }
-                    println(place.name)
+
 
                     if (place.rating != null && place.rating >= viewModel.filterMinRating && place.rating <= viewModel.filterMaxRating) {
                         PlaceListItem(
                             place = place,
                             viewModel = viewModel,
-
+                            listofid = listOfFavouritePlacesID,
+                            switchState = switchState
                         ) { clickedPlace ->
 
                             // Create a Uri from an intent string. Use the result to create an Intent.
@@ -132,7 +157,7 @@ fun PlacesCard(
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (PlaceClass) -> Unit) {
+fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel,listofid:List<String>?,switchState: Boolean , onItemClick: (PlaceClass) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -219,7 +244,11 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (P
                         icon = place.icon,
                     )
 
-                    ClickableHeart(newplace, viewModel)
+
+
+
+
+                    ClickableHeart(newplace, viewModel,listofid,switchState)
 
                     Icon(
                         imageVector = Icons.Filled.Map,
@@ -242,9 +271,12 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel, onItemClick: (P
 fun ClickableHeart(
     newplace: PlaceClass,
     viewModel: PlacesViewModel,
-
+    listofid: List<String>?,
+    switchState: Boolean
 ) {
     var isFavourite by remember{ mutableStateOf(false) }
+
+    var isclicked by remember{ mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -255,9 +287,20 @@ fun ClickableHeart(
 
 
 
-
-
-
+//    val isInList by remember {
+//        mutableStateOf(runBlocking {
+//            database.placeDao().checkIfPlaceExists(newplace.place_id)
+//        })
+//    }
+//isFavourite = isInList
+if(isclicked == false) {
+    if (switchState) {
+        if (listofid?.contains(newplace.place_id) == true)
+            isFavourite = true
+        else
+            isFavourite = false
+    }
+}
     if (isFavourite){
         heartIcon = Icons.Default.Favorite
         Message = "Place added to your favorites list"
@@ -272,22 +315,29 @@ fun ClickableHeart(
         modifier = Modifier
             .clickable {
                 if (!isFavourite) {
-                    coroutineScope.launch {
+                    isclicked = true
+                    coroutineScope.launch(Dispatchers.IO) {
                         println(newplace.name)
 
                         database
                             .placeDao()
                             .insertPlace(newplace)
+
+                        withContext(Dispatchers.Main) {
+                            isclicked = false
+                        }
                         //viewModel.savePlace(newplace)
                         //  placeDao.insertPlace(newplace)
                     }
                 } else {
-                    coroutineScope.launch {
+                    coroutineScope.launch(Dispatchers.IO) {
 
                         database
                             .placeDao()
                             .deletePlace(newplace)
-
+                        withContext(Dispatchers.Main) {
+                            isclicked = false
+                        }
                         //viewModel.deletePlace(newplace)
                         //   println(newplace.placeName)
                         //   placeDao.deletePlaceByNameAndCity(newplace.placeName, newplace.cityName)
@@ -295,6 +345,10 @@ fun ClickableHeart(
 
                 }
                 isFavourite = !isFavourite
+
+
+
+
             }
             .padding(4.dp),
         tint = MaterialTheme.colorScheme.onBackground

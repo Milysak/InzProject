@@ -7,6 +7,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.inzproject.PlacesToVisit.PlaceClass
+import kotlinx.coroutines.flow.Flow
+
 
 @Dao
 interface PlaceDao {
@@ -32,4 +34,7 @@ interface PlaceDao {
 
     @Query("SELECT EXISTS (SELECT 1 FROM love_places WHERE place_id = :placeId)")
     suspend fun checkIfPlaceExists(placeId: String): Boolean
+
+    @Query("SELECT place_id from love_places")
+    fun getIdList(): List<String>
 }

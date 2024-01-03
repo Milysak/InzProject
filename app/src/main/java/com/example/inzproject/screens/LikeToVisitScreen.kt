@@ -90,7 +90,7 @@ fun LikeToVisitScreen(viewModel: PlacesViewModel = hiltViewModel()) {
     var isFilterDialogVisible by remember { mutableStateOf(false) }
 
 
-if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState == "") {
+if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState == "" && switchState == false) {
     LaunchedEffect(key1 = Unit) {
         var res = viewModel.getPlacesAsync(context)
 
@@ -169,14 +169,13 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
 
                                 onClick = {
 
-                                    println(viewModel.state.PlaceInfo)
+
                                     // viewsavePlaces(places,viewModel)
                                     isFilterDialogVisible = true
                                     // Tutaj możesz umieścić kod, który zostanie wykonany po zamknięciu okna dialogowego
-                                    println(viewModel.LocalizationCoordinates)
+
                                     /* Akcja przycisku kalendarza */
-                                    println("czy twoje")
-                                    println(viewModel.currentLocation)
+
                                 }
                             ) {
                                 Icon(
@@ -200,7 +199,7 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
 
                                     // Następnie możesz kontynuować z funkcją getPlacesAsync, itd.
 
-                                    viewModel.getPlacesAsync(context)
+                                   viewModel.getPlacesAsync(context)
 
                                     if (textState !in items) {
                                         items.add(0, textState)
@@ -248,81 +247,11 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                                     }
                                 },
                             ) {
-                                /*items.forEach {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(all = 15.dp)
-                                            .clickable {
-                                                textState = it
-                                            }
-                                    ) {
-                                        androidx.compose.material3.Icon(
-                                            modifier = Modifier.padding(end = 14.dp),
-                                            imageVector = Icons.Default.History,
-                                            contentDescription = "History Icon"
-                                        )
-                                        Text(text = it)
-                                    }
-                                }*/
+
                             }
                         }
 
-                        /*Spacer(modifier = Modifier.weight(0.8f))
 
-                        // Pole tekstowe
-                        TextInputDemo(textState) { newTextInput ->
-                            textState = newTextInput
-                        }
-
-                        Spacer(modifier = Modifier.weight(0.8f))*/
-
-                        // Przycisk z ikoną wyszukiwania
-                        /*Box(
-                            modifier = Modifier
-                                .size(55.dp)
-                                .background(androidx.compose.material3.MaterialTheme.colorScheme.primary, shape = CircleShape),
-
-                            contentAlignment = Alignment.Center
-                        ) {
-
-
-
-                            IconButton(
-                                onClick = {
-                                  //  viewModel.getlocationfromname("London")
-
-                                         println("babuszka")
-                                    println(textState)
-                                        viewModel.setLocalization(textState)
-
-
-
-                                        // Tutaj możesz użyć wartości coordinates, która zostanie zaktualizowana po załadowaniu danych
-
-                                        // Następnie możesz kontynuować z funkcją getPlacesAsync, itd.
-
-
-                                        viewModel.getPlacesAsync(context)
-
-
-
-
-                                    //    viewModel.getlocationfromname("London")
-
-                                       // viewModel.getPlacesAsync()
-
-
-                                    //              viewModel.makeApiRequest("-33.8670522%2C151.1957362",1500,"restaurant")
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Wyszukaj",
-                                    tint = androidx.compose.material3.MaterialTheme.colorScheme.background
-                                )
-                            }
-                        }*/
                     }
 
                     Spacer(
@@ -339,38 +268,6 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                         }
                     )
 
-                    /*Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Leading icon
-                        Icon(
-                            modifier = Modifier.padding(end = 7.5.dp).size(30.dp),
-                            imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = null,
-                            tint = Color.Red.copy(alpha = 0.75f)
-                        )
-
-                        // Switch
-                        androidx.compose.material3.Switch(
-                            checked = switchState,
-                            onCheckedChange = { checked ->
-                                switchState = checked
-                            },
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                        )
-
-                        // Trailing icon
-                        Icon(
-                            modifier = Modifier.padding(start = 7.5.dp).size(30.dp),
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = null,
-                            tint = Color.Red.copy(alpha = 0.75f)
-                        )
-                    }*/
 
                     Row(
                         modifier = Modifier
@@ -401,6 +298,17 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                 )
 
             }
+            if (isFilterDialogVisible) {
+                OpenFilterDialog(
+                    context = context,
+                    isDialogVisible = isFilterDialogVisible,
+                    onClose = {
+                        isFilterDialogVisible = false
+                    },
+                    placesViewModel = viewModel
+                )
+
+            }
 
             PlacesCard(
                 context = context,
@@ -410,6 +318,8 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                 switchState = switchState
             )
 
+       if(switchState == true)
+           viewModel.setstate2()
         }
         if (viewModel.state.isLoading) {
             CircularProgressIndicator(
@@ -429,6 +339,7 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
 
             }
         }
+
 
         if (switchState==false) {
             viewModel.state.error?.let { error ->
@@ -541,25 +452,7 @@ fun FiltersForm(context: Context, placesViewModel: PlacesViewModel, onApply: () 
             .padding(16.dp)
             .fillMaxWidth()
     ) {
-        
-        // Pole tekstowe na wpisanie typu miejsca
-        /*androidx.compose.material3.OutlinedTextField(
-            value = placeType,
-            onValueChange = {
-                placeType = it
-            },
-            label = {
-                Text(
-                    "Typ miejsca...",
-                        color = MaterialTheme.colorScheme.onBackground
-                     )
-                    },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            singleLine = true
-        )
-*/
+
         val options = listOf(
             PlaceType(Icons.Default.ZoomOutMap, "Wszystko", ""),
             PlaceType(Icons.Default.Restaurant, "Restauracja", "restaurant"),
@@ -796,7 +689,7 @@ fun FiltersForm(context: Context, placesViewModel: PlacesViewModel, onApply: () 
                         placeType = placeType
                     )
 
-                    placesViewModel.getPlacesAsync(context)
+                   // placesViewModel.getPlacesAsync(context)
                 },
                 modifier = Modifier
                     .weight(1.0f)
@@ -893,196 +786,4 @@ fun NumberSelector(selectedNumber: Double, onNumberSelected: (Double) -> Unit) {
         }
     }
 }
-
-
-//@Composable
-//fun PlaceListItem(place: PlaceClass) {
-//    Card(
-//        modifier = Modifier
-//            .padding(horizontal = 8.dp, vertical = 8.dp)
-//            .fillMaxWidth(),
-//        elevation = 2.dp,
-//        backgroundColor = graySurface,
-//        shape = RoundedCornerShape(corner = CornerSize(16.dp)),
-//    ) {
-//        Row(Modifier.clickable { }) {
-//          //  PlaceImage(place)
-//            Column(
-//                 modifier = Modifier
-//                     .padding(8.dp)
-//                     .fillMaxWidth()
-//                     .align(Alignment.CenterVertically)
-//            ) {
-//                Text(text = place.name, style = typography1.h6)
-//
-//              Row() {
-//                  Text(text = place.vicinity, style = typography1.caption)
-//                  Spacer(modifier = Modifier.size(10.dp))
-//
-//                 // var newplace=PlaceClass(type = place.type, image = 2, placeName = place.placeName, cityName = place.cityName, availabilityHours = place.availabilityHours, googleNote = place.googleNote)
-//
-//                 //   ClickableHeart(newplace)}
-//
-//
-//                Row() {
-//                    Text(text = place.rating.toString(), style = typography1.caption)
-//                    Icon(
-//                        imageVector = Icons.Default.Star,
-//                        contentDescription = null,
-//                    modifier = Modifier.height(15 .dp))
-//                }
-//            }
-//        }
-//    }
-//
-//}
-@Composable
-fun OpenFilterDialog12() {
-    var isDialogVisible by remember { mutableStateOf(true) }
-
-    if (isDialogVisible) {
-        AlertDialog(
-            onDismissRequest = {
-                isDialogVisible = false
-            },
-            title = {
-                Text("Filtrowanie")
-            },
-            text = {
-                // Tutaj dodaj swoje filtry
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        isDialogVisible = false
-                    }
-                ) {
-                    Text("Zamknij")
-                }
-            }
-        )
-    }
-}
-
-@Composable
-fun OpenFilterDialog() {
-    val context = LocalContext.current
-    val density = LocalDensity.current.density
-
-    val dialogLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        // Tutaj możesz obsłużyć wynik z okna dialogowego
-    }
-
-    var isDialogVisible by remember { mutableStateOf(true) }
-
-    DisposableEffect(isDialogVisible) {
-        onDispose {
-            // Tutaj możesz dodać kod, który zostanie wykonany po zamknięciu okna dialogowego
-        }
-    }
-
-    if (isDialogVisible) {
-        Dialog(
-            onDismissRequest = { isDialogVisible = false },
-            properties = DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            )
-        ) {
-            // Zawartość okna dialogowego z filtrami
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            ) {
-                // Tutaj dodaj swoje filtry
-
-                // Przycisk zamknięcia okna dialogowego
-                Button(
-                    onClick = { isDialogVisible = false },
-                    modifier = Modifier
-                        .padding(top = 16.dp)
-                        .align(Alignment.End)
-                ) {
-                    Text("Zamknij")
-                }
-            }
-        }
-    }
-}
-
-@Composable
- fun PlaceImage(place: Place) {
-    Image(
-        painter = painterResource(id = place.image),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .padding(8.dp)
-            .size(84.dp)
-            .clip(RoundedCornerShape(corner = CornerSize(16.dp)))
-    )
-}
-
-//@Preview
-//@Composable
-//fun PreviewPlaceItem() {
-//    val place = DataProvider.place
-//
-//    PlaceListItem(place = place, navigateToProfile = {}, viewModel = viewModel)
-//}
-
-//
-//fun Icon(imageVector: Int, contentDescription: String, tint: Color) {
-//
-//}
-//
-//fun savePlaces(places: List<Place>,viewModel: PlacesViewModel) {
-//
-//    viewModel.savePlaces(places)
-//}
-//@Composable
-//fun ClickableHeart(newplace:ClassPlace){
-//    var isFavourite by remember{ mutableStateOf(false) }
-//    val context = LocalContext.current
-//        val database = FavouritePlacesDatabase.getDatabase(context)
-//    val placeDao = database.placeDao()
-//    val coroutineScope = rememberCoroutineScope()
-//
-//    var Message:String
-//var heartIcon : ImageVector
-//
-//
-//        if (isFavourite){
-//      heartIcon = Icons.Default.Favorite
-//        Message = "Place added to your favorites list"
-//    }
-//    else {
-//   heartIcon = Icons.Default.FavoriteBorder
-//Message = "Place remove from your favorites list"
-//    }
-//    Icon(imageVector = heartIcon,
-//    contentDescription = null,
-//    modifier = Modifier
-//        .clickable {
-//            if (isFavourite) {
-//                coroutineScope.launch {
-//                    println(newplace.placeName)
-//                    placeDao.insertPlace(newplace)
-//                }
-//            } else {
-//                coroutineScope.launch {
-//                    println(newplace.placeName)
-//                    placeDao.deletePlaceById(newplace.id)
-//                }
-//
-//            }
-//            isFavourite = !isFavourite
-//
-//        }
-//        .padding(4.dp)
-//    )
-//
-//      }
-
 

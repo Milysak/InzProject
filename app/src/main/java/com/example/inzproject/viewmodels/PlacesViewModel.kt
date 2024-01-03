@@ -43,10 +43,11 @@ class PlacesViewModel @Inject constructor(
     private var locationTracker: LocationTracker
     ) : ViewModel() {
 
-    private val _placesLiveData = MutableLiveData<List<PlaceClass>>()
-    val placesLiveData: LiveData<List<PlaceClass>> get() = _placesLiveData
+ //   private val _placesLiveData = MutableLiveData<List<PlaceClass>>()
+   // val placesLiveData: LiveData<List<PlaceClass>> get() = _placesLiveData
 
        //private var allplaces:Deffered<LiveData<List<PlaceClass>>> = placeDao.getAllPlaces()
+
 
 
 
@@ -144,7 +145,6 @@ class PlacesViewModel @Inject constructor(
     }
 
     var state by mutableStateOf(PlaceState())
-        private set
 
     fun loadPlaces() {
         viewModelScope.launch {
@@ -183,7 +183,15 @@ fun setstate(placesResponse: PlacesResponse)
 }
 
 
+    fun setstate2()
+    {
+        state = state.copy(
+            PlaceInfo = null,
+            isLoading = false,
+            error = null
+        )
 
+    }
     fun getlocationfromname(locationname:String) {
         viewModelScope.launch {
             val key = "AIzaSyCXMGGlLd0k2DNkBhC0tbTPr3tj4HutEJI"
@@ -218,6 +226,8 @@ fun setstate(placesResponse: PlacesResponse)
 
     fun getPlacesAsync(context: Context){
         // Tutaj korutyna dla funkcji getPlaces
+        println("dupka")
+
      viewModelScope.launch {
          state = state.copy(
              isLoading = true,
@@ -225,10 +235,10 @@ fun setstate(placesResponse: PlacesResponse)
          )
          var canfindthelocation = true
          val key = "AIzaSyCXMGGlLd0k2DNkBhC0tbTPr3tj4HutEJI"
-
+println("gola")
          if (filterLocalization == "") {
 
-             println("puste")
+
              try {
                  locationTracker.getCurrentLocation()!!.let { location ->
 //              var cordinates = getCoordinates(context)
