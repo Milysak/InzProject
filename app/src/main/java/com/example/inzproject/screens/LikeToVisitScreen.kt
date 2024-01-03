@@ -804,7 +804,8 @@ fun FiltersForm(context: Context, placesViewModel: PlacesViewModel, onApply: () 
             ) {
                 Text(
                     "Zastosuj",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }

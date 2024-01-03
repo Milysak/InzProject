@@ -100,7 +100,7 @@ fun FrontCard(
                     )
                 }",
                 modifier = Modifier.align(Alignment.End),
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -108,9 +108,8 @@ fun FrontCard(
             Text(
                 text = cityOfLocalization,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 style = TextStyle(fontSize = 30.sp)
-
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -124,7 +123,7 @@ fun FrontCard(
             Text(
                 text = "${data.temperatureCelsius}°C",
                 fontSize = 40.sp,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
     }
@@ -161,8 +160,8 @@ fun BackCard(
                     value = data.windSpeed.roundToInt(),
                     unit = " km/h",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_wind),
-                    iconTint = Color.White,
-                    textStyle = TextStyle(color = Color.White),
+                    iconTint = MaterialTheme.colorScheme.onBackground,
+                    textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
                     scale = scale
                 )
 
@@ -171,8 +170,8 @@ fun BackCard(
                     value = data.pressure.roundToInt(),
                     unit = " hPa",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_pressure),
-                    iconTint = Color.White,
-                    textStyle = TextStyle(color = Color.White),
+                    iconTint = MaterialTheme.colorScheme.onBackground,
+                    textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
                     scale = scale
                 )
             }
@@ -186,8 +185,8 @@ fun BackCard(
                     value = data.humidity.roundToInt(),
                     unit = " %",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_drop),
-                    iconTint = Color.White,
-                    textStyle = TextStyle(color = Color.White),
+                    iconTint = MaterialTheme.colorScheme.onBackground,
+                    textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
                     scale = scale
                 )
             }

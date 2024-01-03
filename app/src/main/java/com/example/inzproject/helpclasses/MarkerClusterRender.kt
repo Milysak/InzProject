@@ -17,6 +17,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import com.example.inzproject.R
 import com.example.inzproject.domain.weather.WeatherData
+import com.example.inzproject.ui.theme.Purple40
+import com.example.inzproject.ui.theme.Purple80
+import com.example.inzproject.ui.theme.graySurface
 import com.example.inzproject.viewmodels.MapViewModel
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptor
@@ -113,9 +116,7 @@ class MarkerClusterRender<MyMarker: ClusterItem> @Inject constructor(
         context: Context,
         @DrawableRes vectorDrawableResourceId: Int
     ): BitmapDescriptor? {
-        val backgroundTint = if (context.resources.configuration.isNightModeActive) Color(0xFFC1D7FC) else Color(
-            0xFF0F549B
-        )
+        val backgroundTint = if (context.resources.configuration.isNightModeActive) graySurface else Purple80
         val foregroundTint = if (context.resources.configuration.isNightModeActive) Color(0xFF000D1B) else Color(0xFFF2F6FF)
 
         val background = ContextCompat.getDrawable(context, R.drawable.pin_filled_2)
