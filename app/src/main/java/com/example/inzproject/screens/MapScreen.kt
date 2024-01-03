@@ -1,6 +1,7 @@
 package com.example.inzproject.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -42,6 +43,12 @@ fun MapScreen(
 
         val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(LatLng(viewModel.latitude, viewModel.longitude), viewModel.zoom)
+        }
+
+        if (isSystemInDarkTheme()) {
+            viewModel.setDarkMapTheme()
+        } else {
+            viewModel.setLightMapTheme()
         }
 
         GoogleMap(
