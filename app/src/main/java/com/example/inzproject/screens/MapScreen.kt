@@ -17,10 +17,12 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.compose.*
 import kotlin.random.Random
 import java.util.concurrent.ThreadLocalRandom
+import kotlin.math.abs
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(MapsComposeExperimentalApi::class)
@@ -41,6 +43,8 @@ fun MapScreen(
     ) {
         var isInit by mutableStateOf(false)
 
+        var cameraZoom = 0f
+
         val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(LatLng(viewModel.latitude, viewModel.longitude), viewModel.zoom)
         }
@@ -56,7 +60,11 @@ fun MapScreen(
                 .fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = viewModel.state.properties,
-            uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false),
+            uiSettings = MapUiSettings(
+                zoomControlsEnabled = false,
+                mapToolbarEnabled = false,
+                rotationGesturesEnabled = false
+            ),
             onMapLongClick = { LatLng ->
 
             },
@@ -75,6 +83,8 @@ fun MapScreen(
             var clusterManager by remember { mutableStateOf<ClusterManager<MyMarker>?>(null) }
 
             MapEffect(viewModel.markers) { map ->
+                cameraZoom = map.cameraPosition.zoom
+
                 // map.addCircle(viewModel.circle)
                 viewModel.markers.clear()
 
@@ -107,7 +117,7 @@ fun MapScreen(
                 }
 
                 clusterManager?.cluster()
-                isInit = true
+                //isInit = true
             }
 
             LaunchedEffect(
@@ -165,23 +175,21 @@ fun MapScreen(
 
                         val markers = mutableListOf<MyMarker>()
                         viewModel.markers.forEach {myMarker ->
-                            if (myMarker.itemPosition.latitude in southwest.latitude .. northeast.latitude
-                                    && myMarker.itemPosition.longitude in southwest.longitude .. northeast.longitude) {
-                                markers.add(myMarker)
-                            } else {
-                                markers.add(
-                                    MyMarker(
-                                        LatLng(
-                                            Random.nextDouble(
-                                                southwest.latitude + (northeast.latitude - southwest.latitude)/5,
-                                                northeast.latitude - (northeast.latitude - southwest.latitude)/5
-                                            ),
-                                            Random.nextDouble(
-                                                southwest.longitude + (northeast.longitude - southwest.longitude)/5,
-                                                northeast.longitude - (northeast.longitude - southwest.longitude)/5
-                                            ),
-                                        )
+                            if (
+                                myMarker.itemPosition.latitude in southwest.latitude .. northeast.latitude
+                                    && myMarker.itemPosition.longitude in southwest.longitude .. northeast.longitude
+                            ) {
+                                if (Math.abs(cameraZoom - cameraPositionState.position.zoom) > 0.5f)
+                                    AddMarker(
+                                        currentScreen = currentScreen,
+                                        markers = markers
                                     )
+                                else
+                                    markers.add(myMarker)
+                            } else {
+                                AddMarker(
+                                    currentScreen = currentScreen,
+                                    markers = markers
                                 )
                             }
                         }
@@ -192,6 +200,7 @@ fun MapScreen(
                         }
                     }
 
+                    cameraZoom = cameraPositionState.position.zoom
                     clusterManager?.clearItems()
                     clusterManager?.addItems(viewModel.markers)
                 }
@@ -199,8 +208,27 @@ fun MapScreen(
                 clusterManager?.onCameraIdle()
                 clusterManager?.cluster()
 
-                isInit = false
+                //isInit = false
             }
         }
+    }
+}
+
+fun AddMarker(currentScreen: LatLngBounds?, markers: MutableList<MyMarker>) {
+    currentScreen?.let {
+        markers.add(
+            MyMarker(
+                LatLng(
+                    Random.nextDouble(
+                        it.southwest.latitude + (it.northeast.latitude - it.southwest.latitude) / 5,
+                        it.northeast.latitude - (it.northeast.latitude - it.southwest.latitude) / 5
+                    ),
+                    Random.nextDouble(
+                        it.southwest.longitude + (it.northeast.longitude - it.southwest.longitude) / 5,
+                        it.northeast.longitude - (it.northeast.longitude - it.southwest.longitude) / 5
+                    ),
+                )
+            )
+        )
     }
 }
