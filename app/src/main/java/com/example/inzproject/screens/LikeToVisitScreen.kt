@@ -689,7 +689,7 @@ fun FiltersForm(context: Context, placesViewModel: PlacesViewModel, onApply: () 
                         placeType = placeType
                     )
 
-                   // placesViewModel.getPlacesAsync(context)
+                    placesViewModel.getPlacesAsync(context)
                 },
                 modifier = Modifier
                     .weight(1.0f)

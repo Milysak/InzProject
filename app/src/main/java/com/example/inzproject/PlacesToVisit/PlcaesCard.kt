@@ -94,16 +94,10 @@ fun PlacesCard(
         coroutineScope.launch(Dispatchers.IO) {
 
             listOfFavouritePlacesID = database.placeDao().getIdList()
-
-           withContext(Dispatchers.Main) {
-
-
+            withContext(Dispatchers.Main) {
                 listOfPlaces = state.PlaceInfo?.results
-           }
-
-        }
-
-    }
+            }
+    }}
 
     listOfPlaces.let { data ->
         Box(
@@ -131,7 +125,7 @@ fun PlacesCard(
                             place = place,
                             viewModel = viewModel,
                             listofid = listOfFavouritePlacesID,
-                            switchState = switchState
+
                         ) { clickedPlace ->
 
                             // Create a Uri from an intent string. Use the result to create an Intent.
@@ -157,7 +151,7 @@ fun PlacesCard(
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel,listofid:List<String>?,switchState: Boolean , onItemClick: (PlaceClass) -> Unit) {
+fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel,listofid:List<String>?, onItemClick: (PlaceClass) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -248,7 +242,7 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel,listofid:List<St
 
 
 
-                    ClickableHeart(newplace, viewModel,listofid,switchState)
+                    ClickableHeart(newplace, viewModel,listofid)
 
                     Icon(
                         imageVector = Icons.Filled.Map,
@@ -272,7 +266,7 @@ fun ClickableHeart(
     newplace: PlaceClass,
     viewModel: PlacesViewModel,
     listofid: List<String>?,
-    switchState: Boolean
+
 ) {
     var isFavourite by remember{ mutableStateOf(false) }
 
@@ -284,7 +278,7 @@ fun ClickableHeart(
 
     var Message: String
     var heartIcon : ImageVector
-
+    var snackbarVisible by remember { mutableStateOf(false) }
 
 
 //    val isInList by remember {
@@ -292,14 +286,17 @@ fun ClickableHeart(
 //            database.placeDao().checkIfPlaceExists(newplace.place_id)
 //        })
 //    }
-//isFavourite = isInList
+
 if(isclicked == false) {
-    if (switchState) {
-        if (listofid?.contains(newplace.place_id) == true)
+
+        if (listofid?.contains(newplace.place_id) == true) {
             isFavourite = true
-        else
+            heartIcon = Icons.Default.Favorite
+        }
+        else {
             isFavourite = false
-    }
+            heartIcon = Icons.Default.FavoriteBorder
+        }
 }
     if (isFavourite){
         heartIcon = Icons.Default.Favorite
@@ -309,50 +306,59 @@ if(isclicked == false) {
         heartIcon = Icons.Default.FavoriteBorder
         Message = "Place remove from your favorites list"
     }
-    Icon(
-        imageVector = heartIcon,
-        contentDescription = null,
-        modifier = Modifier
-            .clickable {
-                if (!isFavourite) {
-                    isclicked = true
-                    coroutineScope.launch(Dispatchers.IO) {
-                        println(newplace.name)
 
-                        database
-                            .placeDao()
-                            .insertPlace(newplace)
+        Icon(
+            imageVector = heartIcon,
+            contentDescription = null,
+            modifier = Modifier
+                .clickable {
+                    if (!isFavourite) {
 
-                        withContext(Dispatchers.Main) {
-                            isclicked = false
+
+                        isclicked = true
+                        coroutineScope.launch(Dispatchers.IO) {
+                            println(newplace.name)
+
+                            database
+                                .placeDao()
+                                .insertPlace(newplace)
+
+                            withContext(Dispatchers.Main) {
+                                isclicked = false
+                                snackbarVisible = true
+                            }
+                            //viewModel.savePlace(newplace)
+                            //  placeDao.insertPlace(newplace)
                         }
-                        //viewModel.savePlace(newplace)
-                        //  placeDao.insertPlace(newplace)
-                    }
-                } else {
-                    coroutineScope.launch(Dispatchers.IO) {
+                    } else {
+                      //  isclicked = true
+                        coroutineScope.launch(Dispatchers.IO) {
 
-                        database
-                            .placeDao()
-                            .deletePlace(newplace)
-                        withContext(Dispatchers.Main) {
-                            isclicked = false
+                            database
+                                .placeDao()
+                                .deletePlace(newplace)
+                            withContext(Dispatchers.Main) {
+                                isclicked = false
+                                snackbarVisible = true
+                            }
+                            //viewModel.deletePlace(newplace)
+                            //   println(newplace.placeName)
+                            //   placeDao.deletePlaceByNameAndCity(newplace.placeName, newplace.cityName)
                         }
-                        //viewModel.deletePlace(newplace)
-                        //   println(newplace.placeName)
-                        //   placeDao.deletePlaceByNameAndCity(newplace.placeName, newplace.cityName)
+
                     }
+                    isFavourite = !isFavourite
+
 
                 }
-                isFavourite = !isFavourite
+                .padding(4.dp),
+            tint = MaterialTheme.colorScheme.onBackground
+        )
 
 
 
 
-            }
-            .padding(4.dp),
-        tint = MaterialTheme.colorScheme.onBackground
-    )
+
 
 }
 

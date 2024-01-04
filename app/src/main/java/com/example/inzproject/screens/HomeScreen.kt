@@ -4,7 +4,9 @@ package com.example.inzproject.screens
 import android.app.DatePickerDialog
 import android.content.Context
 import android.widget.DatePicker
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+//import com.example.inzproject.Manifest
 import com.example.inzproject.R
 import com.example.inzproject.WeatherForecast.domain.location.LocationTracker
 import com.example.inzproject.WeatherForecast.presentation.WeatherCard
@@ -44,18 +47,18 @@ import com.example.inzproject.WeatherForecast.presentation.WeatherForecast
 import com.example.inzproject.WeatherForecast.presentation.ui.theme.DarkBlue
 import com.example.inzproject.WeatherForecast.presentation.ui.theme.DeepBlue
 import com.example.inzproject.components.MyDatePickerDialog
+import com.example.inzproject.permissions.PermissionUtils
 import com.example.inzproject.viewmodels.MainViewModel
 import com.example.inzproject.viewmodels.WeatherViewModel
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.util.*
 //import kotlin.coroutines.jvm.internal.CompletedContinuation.context
-
+import android.Manifest
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: WeatherViewModel = hiltViewModel(),
 ) {
-    lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
     var city by remember {
         mutableStateOf("")
@@ -68,13 +71,42 @@ fun HomeScreen(
     }
 
     val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true &&
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        ) {
+            // User has granted location permissions
+            // Call your method to load weather info or perform location-related tasks
+            viewModel.loadWeatherInfo(context = context, "mylocation", selectedDay)
+        } else {
+            viewModel.loadWeatherInfo(context = context, "mylocation", selectedDay)
+
+            // Handle the case when the user denies location permissions
+            // You may want to show a message or take appropriate action
+        }
+    }
+
+
+
     // val newLocationTracker = LocationTracker()
     //viewModel.updateParams(newRepository, newLocationTracker, newCityName)
-    if(viewModel.state.weatherInfo==null && viewModel.state.error==null && viewModel.textState =="") {
+    if (viewModel.state.weatherInfo == null && viewModel.state.error == null && viewModel.textState == "") {
         LaunchedEffect(key1 = Unit) {
-            var res = viewModel.loadWeatherInfo(context = context, "mylocation", selectedDay)
-
-
+            // Check for location permissions
+            if (PermissionUtils.isLocationPermissionGranted(context)) {
+                // Location permissions are granted
+                viewModel.loadWeatherInfo(context = context, "mylocation", selectedDay)
+            } else {
+                // Request location permissions
+                permissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                    )
+                )
+            }
         }
     }
 
