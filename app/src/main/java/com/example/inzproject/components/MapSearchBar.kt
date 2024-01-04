@@ -18,10 +18,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.inzproject.domain.repository.WeatherRepository
+import com.example.inzproject.viewmodels.MapViewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapSearchBar() {
+fun MapSearchBar(
+        viewModel: MapViewModel,
+        cameraPositionState: CameraPositionState
+    ) {
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     var items = remember {
@@ -41,15 +49,21 @@ fun MapSearchBar() {
             query = text,
             onQueryChange = { text = it },
             onSearch = {
-                if (text !in items) {
-                    items.add(0, text)
-                } else {
-                    items.remove(text)
-                    items.add(0, text)
-                }
+                if (text != "") {
+                    text = text.trimEnd()
 
-                active = false
-                text = ""
+                    if (text !in items) {
+                        items.add(0, text)
+                    } else {
+                        items.remove(text)
+                        items.add(0, text)
+                    }
+
+                    viewModel.location = text
+
+                    active = false
+                    text = ""
+                }
                        },
             active = active,
             onActiveChange = {
@@ -113,10 +127,4 @@ fun MapSearchBar() {
             }
         }
     }
-}
-
-@Composable
-@Preview
-fun MapSearchBarPreview() {
-    MapSearchBar()
 }

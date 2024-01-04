@@ -1,6 +1,8 @@
 package com.example.inzproject.screens
 
 import android.annotation.SuppressLint
+import android.location.Address
+import android.location.Geocoder
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
@@ -30,6 +32,15 @@ import kotlin.math.abs
 fun MapScreen(
     viewModel : MapViewModel = hiltViewModel(),
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
+    val geocoder = Geocoder(LocalContext.current)
+    var addressList: List<Address>? = null
+
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(LatLng(viewModel.latitude, viewModel.longitude), viewModel.zoom)
+    }
+
     /*viewModel.markers.add(com.example.inzproject.data.dataclasses.MyMarker(LatLng(50.24107598158953, 18.99944985875562)))
     viewModel.markers.add(com.example.inzproject.data.dataclasses.MyMarker(LatLng(50.18404284819005, 19.060459047724578)))
     viewModel.markers.add(com.example.inzproject.data.dataclasses.MyMarker(LatLng(50.18837862274404, 18.956688860933173)))
@@ -37,17 +48,14 @@ fun MapScreen(
     Scaffold(
         topBar = {
             MapSearchBar(
-
+                viewModel = viewModel,
+                cameraPositionState = cameraPositionState
             )
         }
     ) {
         var isInit by mutableStateOf(false)
 
         var cameraZoom = 0f
-
-        val cameraPositionState = rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(LatLng(viewModel.latitude, viewModel.longitude), viewModel.zoom)
-        }
 
         if (isSystemInDarkTheme()) {
             viewModel.setDarkMapTheme()
@@ -70,6 +78,9 @@ fun MapScreen(
             },
             onMapClick = { LatLng ->
 
+            },
+            onMapLoaded = {
+
             }
         ) {
             val currentScreen: LatLngBounds? by mutableStateOf(cameraPositionState.projection?.visibleRegion?.latLngBounds)
@@ -82,7 +93,26 @@ fun MapScreen(
 
             var clusterManager by remember { mutableStateOf<ClusterManager<MyMarker>?>(null) }
 
-            MapEffect(viewModel.markers) { map ->
+
+            MapEffect(
+                key1 = viewModel.markers,
+                key2 = viewModel.location
+            ) { map ->
+
+                if (viewModel.location != "") {
+                    addressList = geocoder.getFromLocationName(viewModel.location, 1)
+                    val address: Address = addressList!![0]
+                    val latLng = LatLng(address.latitude, address.longitude)
+
+                    map.animateCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                            latLng, 12f
+                        ),
+                        400,
+                        null
+                    )
+                }
+
                 cameraZoom = map.cameraPosition.zoom
 
                 // map.addCircle(viewModel.circle)
@@ -116,8 +146,30 @@ fun MapScreen(
                     true
                 }
 
+                currentScreen?.apply {
+                    if (viewModel.markers.isEmpty()) {
+                        for (i in 0..2) {
+                            viewModel.markers.add(
+                                MyMarker(
+                                    LatLng(
+                                        Random.nextDouble(
+                                            southwest.latitude + (northeast.latitude - southwest.latitude) / 5,
+                                            northeast.latitude - (northeast.latitude - southwest.latitude) / 5
+                                        ),
+                                        Random.nextDouble(
+                                            southwest.longitude + (northeast.longitude - southwest.longitude) / 5,
+                                            northeast.longitude - (northeast.longitude - southwest.longitude) / 5
+                                        ),
+                                    )
+                                )
+                            )
+                        }
+                    }
+                }
+
+                clusterManager?.onCameraIdle()
                 clusterManager?.cluster()
-                //isInit = true
+                isInit = true
             }
 
             LaunchedEffect(
@@ -129,9 +181,11 @@ fun MapScreen(
             }*/
 
                 currentScreen?.apply {
+                    val markers = mutableListOf<MyMarker>()
+
                     if (viewModel.markers.isEmpty()) {
                         for (i in 0 .. 2) {
-                            viewModel.markers.add(
+                            markers.add(
                                 MyMarker(
                                     LatLng(
                                         Random.nextDouble(
@@ -173,31 +227,31 @@ fun MapScreen(
                             }
                         }*/
 
-                        val markers = mutableListOf<MyMarker>()
-                        viewModel.markers.forEach {myMarker ->
+                        viewModel.markers.forEach { myMarker ->
                             if (
                                 myMarker.itemPosition.latitude in southwest.latitude .. northeast.latitude
                                     && myMarker.itemPosition.longitude in southwest.longitude .. northeast.longitude
                             ) {
                                 if (Math.abs(cameraZoom - cameraPositionState.position.zoom) > 0.5f)
-                                    AddMarker(
+                                    addMarker(
                                         currentScreen = currentScreen,
                                         markers = markers
                                     )
                                 else
                                     markers.add(myMarker)
                             } else {
-                                AddMarker(
+                                addMarker(
                                     currentScreen = currentScreen,
                                     markers = markers
                                 )
                             }
                         }
-                        viewModel.markers.clear()
+                    }
 
-                        markers.forEach {
-                            viewModel.markers.add(it)
-                        }
+                    viewModel.markers.clear()
+
+                    markers.forEach {
+                        viewModel.markers.add(it)
                     }
 
                     cameraZoom = cameraPositionState.position.zoom
@@ -214,7 +268,7 @@ fun MapScreen(
     }
 }
 
-fun AddMarker(currentScreen: LatLngBounds?, markers: MutableList<MyMarker>) {
+fun addMarker(currentScreen: LatLngBounds?, markers: MutableList<MyMarker>) {
     currentScreen?.let {
         markers.add(
             MyMarker(

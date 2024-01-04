@@ -14,6 +14,7 @@ import com.example.inzproject.domain.weather.WeatherType
 import com.example.inzproject.mapstyles.DarkMapStyle
 import com.example.inzproject.mapstyles.LightMapStyle
 import com.example.inzproject.states.MapState
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.clustering.ClusterItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,8 @@ class MapViewModel @Inject constructor(
     private var repository: WeatherRepository,
 ): ViewModel() {
     var state by mutableStateOf(MapState())
+
+    var location by mutableStateOf("")
 
     var latitude by mutableStateOf(50.262606656386104)
 

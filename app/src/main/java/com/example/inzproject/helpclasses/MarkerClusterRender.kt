@@ -8,10 +8,7 @@ import android.os.Build
 import android.provider.Settings.Global
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
@@ -42,6 +39,7 @@ class MarkerClusterRender<MyMarker: ClusterItem> @Inject constructor(
     ) : DefaultClusterRenderer<MyMarker>(context, googleMap, clusterManager) {
 
     var icon: Int by mutableStateOf(R.drawable.ic_sunnycloudy)
+
     var weather: WeatherData? = null
 
     companion object {
@@ -56,11 +54,12 @@ class MarkerClusterRender<MyMarker: ClusterItem> @Inject constructor(
     override fun onBeforeClusterItemRendered(item: MyMarker, markerOptions: MarkerOptions) {
         super.onBeforeClusterItemRendered(item, markerOptions)
 
-        GlobalScope.launch {
-            val weatherFetcher = async { viewModel.getWeatherIcon(item) }
-            weather = weatherFetcher.await()
-            icon = weather?.weatherType?.iconRes ?: R.drawable.ic_sunnycloudy
+        GlobalScope.launch(Dispatchers.Unconfined) {
+            weather = viewModel.getWeatherIcon(item)
+            println(weather)
         }
+
+        icon = weather?.weatherType?.iconRes ?: R.drawable.ic_sunnycloudy
 
         markerOptions.icon(bitmapDescriptorFromVector(context, icon))
 
@@ -116,7 +115,7 @@ class MarkerClusterRender<MyMarker: ClusterItem> @Inject constructor(
         context: Context,
         @DrawableRes vectorDrawableResourceId: Int
     ): BitmapDescriptor? {
-        val backgroundTint = if (context.resources.configuration.isNightModeActive) graySurface else Purple80
+        val backgroundTint = if (context.resources.configuration.isNightModeActive) Purple80 else Purple40
         val foregroundTint = if (context.resources.configuration.isNightModeActive) Color(0xFF000D1B) else Color(0xFFF2F6FF)
 
         val background = ContextCompat.getDrawable(context, R.drawable.pin_filled_2)
