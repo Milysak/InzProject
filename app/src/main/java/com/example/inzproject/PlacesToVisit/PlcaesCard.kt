@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,61 +59,29 @@ fun PlacesCard(
 ) {
 
 
-
-
-    var listOfFavouritePlacesID by remember {
-        mutableStateOf<List<String>?>(null)
-    }
-
-
     val localeContext = LocalContext.current
     val database = FavouritePlacesDatabase.getInstance(localeContext)
 
-    val coroutineScope =  CoroutineScope(Dispatchers.Main)
+    val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     var nullList: List<PlaceClass>? = null
-    var listOfPlaces by remember {
-        mutableStateOf(nullList)
-    }
 
 
-
-
-    if (switchState) {
-        coroutineScope.launch(Dispatchers.IO) {
-            /*val list = async { database.placeDao().getAllPlaces() }
-            if (list.await().isEmpty()) println("Pusta baza!") else println("Nie pusta baza!")
-            list.await().forEach {
-                println(it.name)
-            }*/
-            listOfPlaces = database.placeDao().getAllPlaces()
-            listOfFavouritePlacesID = database.placeDao().getIdList()
-
-        }
-    } else {
-
-        coroutineScope.launch(Dispatchers.IO) {
-
-            listOfFavouritePlacesID = database.placeDao().getIdList()
-            withContext(Dispatchers.Main) {
-                listOfPlaces = state.PlaceInfo?.results
-            }
-    }}
-
-    listOfPlaces.let { data ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 10.dp)
-                .padding(bottom = 20.dp),
-        ) {
-            LazyColumn(
+    if (state.error == null) {
+        state.places.let { data ->
+            Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp)
+                    .padding(bottom = 20.dp),
             ) {
-                items(
-                    items = data ?: emptyList()
-                ) { place ->
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                ) {
+                    items(
+                        items = data ?: emptyList()
+                    ) { place ->
 
 //                    var IsInLoveList = false
 //                    coroutineScope.launch(Dispatchers.IO) {
@@ -120,26 +89,27 @@ fun PlacesCard(
 //                    }
 
 
-                    if (place.rating != null && place.rating >= viewModel.filterMinRating && place.rating <= viewModel.filterMaxRating) {
-                        PlaceListItem(
-                            place = place,
-                            viewModel = viewModel,
-                            listofid = listOfFavouritePlacesID,
+                        if (place.rating != null && place.rating >= viewModel.filterMinRating && place.rating <= viewModel.filterMaxRating) {
+                            PlaceListItem(
+                                place = place,
+                                viewModel = viewModel,
+                                listofid = state.favoritePlacesIds,
 
-                        ) { clickedPlace ->
+                                ) { clickedPlace ->
 
-                            // Create a Uri from an intent string. Use the result to create an Intent.
-                            val gmmIntentUri = Uri.parse("geo:0,0?q=${clickedPlace.name}")
+                                // Create a Uri from an intent string. Use the result to create an Intent.
+                                val gmmIntentUri = Uri.parse("geo:0,0?q=${clickedPlace.name}")
 
-                            // Create an Intent from gmmIntentUri. Set the action to ACTION_VIEW
-                            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                                // Create an Intent from gmmIntentUri. Set the action to ACTION_VIEW
+                                val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
 
-                            // Make the Intent explicit by setting the Google Maps package
-                            mapIntent.setPackage("com.google.android.apps.maps")
+                                // Make the Intent explicit by setting the Google Maps package
+                                mapIntent.setPackage("com.google.android.apps.maps")
 
-                            // Attempt to start an activity that can handle the Intent
-                            startActivity(localeContext, mapIntent, null)
+                                // Attempt to start an activity that can handle the Intent
+                                startActivity(localeContext, mapIntent, null)
 
+                            }
                         }
                     }
                 }
@@ -147,7 +117,6 @@ fun PlacesCard(
         }
     }
 }
-
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
@@ -240,8 +209,6 @@ fun PlaceListItem(place: PlaceClass, viewModel: PlacesViewModel,listofid:List<St
 
 
 
-
-
                     ClickableHeart(newplace, viewModel,listofid)
 
                     Icon(
@@ -312,16 +279,13 @@ if(isclicked == false) {
             contentDescription = null,
             modifier = Modifier
                 .clickable {
+                    viewModel.toggleFavoritePlace(newplace)
                     if (!isFavourite) {
 
 
                         isclicked = true
                         coroutineScope.launch(Dispatchers.IO) {
                             println(newplace.name)
-
-                            database
-                                .placeDao()
-                                .insertPlace(newplace)
 
                             withContext(Dispatchers.Main) {
                                 isclicked = false
@@ -334,9 +298,6 @@ if(isclicked == false) {
                       //  isclicked = true
                         coroutineScope.launch(Dispatchers.IO) {
 
-                            database
-                                .placeDao()
-                                .deletePlace(newplace)
                             withContext(Dispatchers.Main) {
                                 isclicked = false
                                 snackbarVisible = true

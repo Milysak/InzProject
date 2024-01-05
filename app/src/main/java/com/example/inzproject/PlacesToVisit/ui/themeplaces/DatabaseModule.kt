@@ -35,8 +35,8 @@ object DatabaseModule{
     @Singleton
     @Provides
     fun provideDatabase(@ApplicationContext context: Context): FavouritePlacesDatabase {
-        return Room.databaseBuilder(context, FavouritePlacesDatabase::class.java, "favourite_places_database")
-            .createFromAsset("database/Favourites.db")
+        return Room.databaseBuilder(context, FavouritePlacesDatabase::class.java, FavouritePlacesDatabase.DB_NAME)
+            //.createFromAsset("database/Favourites.db")
             .build()
     }
 

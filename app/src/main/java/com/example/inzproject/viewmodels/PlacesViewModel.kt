@@ -5,6 +5,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ZoomOutMap
 import androidx.compose.runtime.getValue
@@ -34,11 +35,11 @@ import retrofit2.Response
 import javax.inject.Inject
 //import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 import com.example.inzproject.domain.location.LocationTracker
+import kotlinx.coroutines.flow.*
 
 @HiltViewModel
 class PlacesViewModel @Inject constructor(
-    private val database: FavouritePlacesDatabase,
-    private val placeDao: PlaceDao,
+    database: FavouritePlacesDatabase,
     private val googlePlacesApi: CordinatesApi,
     private var locationTracker: LocationTracker
     ) : ViewModel() {
@@ -48,9 +49,48 @@ class PlacesViewModel @Inject constructor(
 
        //private var allplaces:Deffered<LiveData<List<PlaceClass>>> = placeDao.getAllPlaces()
 
+    private val placeDao = database.placeDao()
+    var state by mutableStateOf(PlaceState())
+    private val allPlaces = MutableStateFlow<List<PlaceClass>>(emptyList())
+    private val switchCase = MutableStateFlow(false)
+
+    init {
+        viewModelScope.launch() {
+            combine(
+                allPlaces,
+                switchCase,
+            ) { places, case ->
+                state = state.copy(
+                    places = if (case) places.filter {
+                        val favoritePlacesIds = placeDao.getAllPlaces()
+                            .map { place -> place.place_id }
+
+                        it.place_id in favoritePlacesIds
+                    } else places,
+                    favoritePlacesIds = placeDao.getAllPlaces().map { it.place_id },
+                )
+            }.collect()
+        }
+    }
 
 
+    fun clearAllPlaces() {
+        viewModelScope.launch {
+            allPlaces.emit(emptyList())
+        }
+    }
+    fun updateSwitchCase(case: Boolean) {
+        switchCase.update { case }
+    }
 
+    fun toggleFavoritePlace(place: PlaceClass) {
+        viewModelScope.launch {
+            placeDao.toggleFavoritePlace(place = place)
+            state = state.copy(
+                favoritePlacesIds = placeDao.getAllPlaces().map { it.place_id },
+            )
+        }
+    }
 
     var filterKeyword by mutableStateOf("")
         private set
@@ -65,6 +105,9 @@ class PlacesViewModel @Inject constructor(
 
     var filterLocalization by mutableStateOf("")
         private set
+var isFirstload by mutableStateOf(true)
+    private set
+
 
 
     val localizationCoordinates = MutableLiveData<String>("")
@@ -144,8 +187,6 @@ class PlacesViewModel @Inject constructor(
         filterPlaceType = placeType
     }
 
-    var state by mutableStateOf(PlaceState())
-
     fun loadPlaces() {
         viewModelScope.launch {
             val places = placeDao.getAllPlaces()
@@ -172,15 +213,13 @@ class PlacesViewModel @Inject constructor(
             placeDao.deletePlace(placeclass = place)
         }
     }
-fun setstate(placesResponse: PlacesResponse)
-{
-    state = state.copy(
-                             PlaceInfo = placesResponse as PlacesResponse?,
-                             isLoading = false,
-                             error = null
-                         )
 
-}
+    fun setstate(placesResponse: PlacesResponse) {
+        state = state.copy(
+            PlaceInfo = placesResponse as PlacesResponse?, isLoading = false, error = null
+        )
+
+    }
 
 
     fun setstate2()
@@ -224,9 +263,8 @@ fun setstate(placesResponse: PlacesResponse)
         }
     }
 
-    fun getPlacesAsync(context: Context){
+    fun getPlacesAsync(){
         // Tutaj korutyna dla funkcji getPlaces
-        println("dupka")
 
      viewModelScope.launch {
          state = state.copy(
@@ -235,8 +273,9 @@ fun setstate(placesResponse: PlacesResponse)
          )
          var canfindthelocation = true
          val key = "AIzaSyCXMGGlLd0k2DNkBhC0tbTPr3tj4HutEJI"
-println("gola")
-         if (filterLocalization == "") {
+println(filterLocalization)
+
+         if (filterLocalization == "" || filterLocalization == null) {
 
 
              try {
@@ -292,6 +331,7 @@ println("gola")
 
          }
 if(canfindthelocation){
+    println("found")
          var isWaiting = true
          val loc = LocalizationCoordinates
          val radius = filterRadius.toString()
@@ -313,15 +353,17 @@ if(canfindthelocation){
 
 
              if (result.isSuccessful) {
-
+println("succes")
                  if (result.body()?.results?.isEmpty() == true) {
 
+               println("empyt")
                      state = state.copy(
                          PlaceInfo = null,
                          isLoading = false,
                          error = "No places with the specified parameters were found"
                      )
                  } else {
+                     println("empyt2")
 
                      state = state.copy(
                          PlaceInfo = result.body(),
@@ -329,10 +371,18 @@ if(canfindthelocation){
                          error = null
                      )
 
+                     allPlaces.update { result.body()?.results ?: emptyList() }
+
+//                     state = state.copy(
+//                         PlaceInfo = result.body(),
+//                         isLoading = false,
+//                         error = null
+//                     )
+
 
                  }
              } else {
-
+                 println("empyt3")
                  state = state.copy(
                      PlaceInfo = null,
                      isLoading = false,
@@ -351,6 +401,7 @@ if(canfindthelocation){
 //             }
              }
          } else {
+             println("empyt4")
              state = state.copy(
                  PlaceInfo = null,
                  isLoading = false,

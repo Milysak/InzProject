@@ -1,11 +1,6 @@
 package com.example.inzproject.PlacesToVisit.ROOM
 
-import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.example.inzproject.PlacesToVisit.PlaceClass
 import kotlinx.coroutines.flow.Flow
 
@@ -18,13 +13,23 @@ interface PlaceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlace(placeclass: PlaceClass)
 
-
+    @Transaction
+    suspend fun toggleFavoritePlace(place: PlaceClass) {
+        if (checkIfPlaceExists(placeId = place.place_id)) {
+            deletePlace(place)
+        } else {
+            insertPlace(place)
+        }
+    }
 
     @Delete
     suspend fun deletePlace(placeclass: PlaceClass)
 
     @Query("SELECT * FROM love_places")
     suspend fun getAllPlaces(): List<PlaceClass>
+
+    @Query("SELECT * FROM love_places")
+    fun observeFavoritePlaces(): Flow<List<PlaceClass>>
 
     @Query("DELETE FROM love_places WHERE place_id = :placeId")
     suspend fun deletePlaceById(placeId: String)

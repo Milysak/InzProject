@@ -2,6 +2,7 @@ package com.example.inzproject.screens
 import android.app.Activity
 import android.content.Context
 import android.graphics.Paint.Align
+import android.util.Log
 //import androidx.compose.material3.icons.filled.*
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -90,9 +91,11 @@ fun LikeToVisitScreen(viewModel: PlacesViewModel = hiltViewModel()) {
     var isFilterDialogVisible by remember { mutableStateOf(false) }
 
 
-if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState == "" && switchState == false) {
+if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && viewModel.filterLocalization == "" && switchState == false ) {
+println("dane nane")
+
     LaunchedEffect(key1 = Unit) {
-        var res = viewModel.getPlacesAsync(context)
+       var res = viewModel.getPlacesAsync()
 
     }
 }
@@ -199,7 +202,7 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
 
                                     // Następnie możesz kontynuować z funkcją getPlacesAsync, itd.
 
-                                   viewModel.getPlacesAsync(context)
+                                   viewModel.getPlacesAsync()
 
                                     if (textState !in items) {
                                         items.add(0, textState)
@@ -263,6 +266,7 @@ if(viewModel.state.PlaceInfo==null && viewModel.state.error==null && textState =
                         currentSelection = currentSelection,
                         toggleStates = listOfFilters,
                         onToggleChange = { state ->
+                            viewModel.updateSwitchCase(state == "Ulubione")
                             currentSelection = state
                             switchState = state != listOfFilters[0]
                         }
@@ -689,7 +693,7 @@ fun FiltersForm(context: Context, placesViewModel: PlacesViewModel, onApply: () 
                         placeType = placeType
                     )
 
-                    placesViewModel.getPlacesAsync(context)
+                    placesViewModel.getPlacesAsync()
                 },
                 modifier = Modifier
                     .weight(1.0f)

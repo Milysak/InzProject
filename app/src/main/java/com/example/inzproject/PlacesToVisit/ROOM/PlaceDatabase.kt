@@ -15,6 +15,8 @@ abstract class FavouritePlacesDatabase : RoomDatabase() {
 
     companion object {
 
+        const val DB_NAME = "love_places"
+
         @Volatile
         private var INSTANCE: FavouritePlacesDatabase? = null
 
@@ -27,7 +29,7 @@ abstract class FavouritePlacesDatabase : RoomDatabase() {
                     instance = Room.databaseBuilder(
                         context.applicationContext,
                         FavouritePlacesDatabase::class.java,
-                        "love_places"
+                        DB_NAME
                     ).fallbackToDestructiveMigration()
                         .build()
 
@@ -37,4 +39,5 @@ abstract class FavouritePlacesDatabase : RoomDatabase() {
             }
         }
     }
+
 }
