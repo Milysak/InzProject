@@ -43,12 +43,6 @@ class PlacesViewModel @Inject constructor(
     private val googlePlacesApi: CordinatesApi,
     private var locationTracker: LocationTracker
     ) : ViewModel() {
-
- //   private val _placesLiveData = MutableLiveData<List<PlaceClass>>()
-   // val placesLiveData: LiveData<List<PlaceClass>> get() = _placesLiveData
-
-       //private var allplaces:Deffered<LiveData<List<PlaceClass>>> = placeDao.getAllPlaces()
-
     private val placeDao = database.placeDao()
     var state by mutableStateOf(PlaceState())
     private val allPlaces = MutableStateFlow<List<PlaceClass>>(emptyList())
@@ -60,15 +54,28 @@ class PlacesViewModel @Inject constructor(
                 allPlaces,
                 switchCase,
             ) { places, case ->
-                state = state.copy(
-                    places = if (case) places.filter {
-                        val favoritePlacesIds = placeDao.getAllPlaces()
-                            .map { place -> place.place_id }
 
-                        it.place_id in favoritePlacesIds
-                    } else places,
-                    favoritePlacesIds = placeDao.getAllPlaces().map { it.place_id },
-                )
+                var favouriteplaces = placeDao.getAllPlaces()
+                var PlacesList = places
+
+            if(case){
+           PlacesList = favouriteplaces
+
+            }
+            state = state.copy(
+                places = PlacesList,
+            favoritePlacesIds = favouriteplaces.map { it.place_id }
+            )
+            //wersja z filtracją danych w ulubione
+            //                state = state.copy(
+//                    places = if (case) places.filter {
+//                        val favoritePlacesIds = placeDao.getAllPlaces()
+//                            .map { place -> place.place_id }
+//
+//                        it.place_id in favoritePlacesIds
+//                    } else places,
+//                    favoritePlacesIds = placeDao.getAllPlaces().map { it.place_id },
+//                )
             }.collect()
         }
     }

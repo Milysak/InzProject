@@ -21,6 +21,8 @@ interface PlaceDao {
             insertPlace(place)
         }
     }
+    @Query("SELECT * FROM love_places")
+    fun observeFavoritePlaces(): Flow<List<PlaceClass>>
 
     @Delete
     suspend fun deletePlace(placeclass: PlaceClass)
@@ -28,8 +30,7 @@ interface PlaceDao {
     @Query("SELECT * FROM love_places")
     suspend fun getAllPlaces(): List<PlaceClass>
 
-    @Query("SELECT * FROM love_places")
-    fun observeFavoritePlaces(): Flow<List<PlaceClass>>
+
 
     @Query("DELETE FROM love_places WHERE place_id = :placeId")
     suspend fun deletePlaceById(placeId: String)
