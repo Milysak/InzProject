@@ -1,5 +1,7 @@
 package com.example.inzproject.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -35,6 +37,7 @@ import com.example.inzproject.navigation.BottomRoutes
 import com.example.inzproject.navigation.Routes
 import com.example.inzproject.viewmodels.WeatherViewModel
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun BottomNavigation() {
 
@@ -60,7 +63,7 @@ fun BottomBar(navController: NavHostController) {
         BottomRoutes.LikeToVisit,
         BottomRoutes.Map,
         BottomRoutes.Compass,
-        BottomRoutes.Settings
+        /*BottomRoutes.Settings*/
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()

@@ -236,7 +236,9 @@ fun MapScreen(
                             modifier = Modifier.padding(start = 7.5.dp),
                             colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.background),
                             query = textState,
-                            onQueryChange = { textState = it },
+                            onQueryChange = {
+                                textState = it
+                                            },
                             onSearch = {
                                 active = !active
                             },
@@ -436,10 +438,8 @@ fun MapScreen(
                         )
 
                         deleteSpecialPlaceWindow = true
-
-                        Toast.makeText(mContext, item.itemTitle, Toast.LENGTH_SHORT).show()
                     } else {
-
+                        Toast.makeText(mContext, "${item.temperature}°C", Toast.LENGTH_SHORT).show()
                     }
                     true
                 }

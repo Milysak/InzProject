@@ -68,9 +68,14 @@ class MapViewModel @Inject constructor(
 
     private val lightMapTheme = MapStyleOptions(LightMapStyle.json)
 
-    suspend fun getWeatherIcon(item: ClusterItem) : WeatherData? =
-        repository.getWeatherData(item.position.latitude, item.position.longitude)
-            .data?.currentWeatherData
+    var weatherData: WeatherData? by mutableStateOf(null)
+
+    fun getWeather(latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            weatherData = repository.getWeatherData(latitude, longitude)
+                .data?.currentWeatherData
+        }
+    }
 
     fun setDarkMapTheme() {
         state = state.copy(

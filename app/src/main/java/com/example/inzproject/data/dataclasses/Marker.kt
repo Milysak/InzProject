@@ -1,5 +1,6 @@
 package com.example.inzproject.data.dataclasses
 
+import android.health.connect.datatypes.units.Temperature
 import androidx.compose.ui.graphics.Color
 import com.example.inzproject.data.MarkerType
 import com.google.android.gms.maps.model.LatLng
@@ -12,7 +13,8 @@ data class MyMarker(
     var itemSnippet: String = "M",
     val type: MarkerType,
     val color: Color? = null,
-    val icon: Int? = null
+    val icon: Int? = null,
+    var temperature: Double? = null,
 ) : ClusterItem {
     public var isSelected: Boolean = false
 

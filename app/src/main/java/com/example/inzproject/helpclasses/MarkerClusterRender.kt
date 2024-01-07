@@ -40,13 +40,6 @@ class MarkerClusterRender<MyMarker: ClusterItem> @Inject constructor(
 
     var icon: Int by mutableStateOf(R.drawable.ic_sunnycloudy)
 
-    var weather: WeatherData? = null
-
-    companion object {
-        const val SELECTED_ALPHA = 1.0f
-        const val UNSELECTED_ALPHA = 0.95f
-    }
-
     private var clusterMap: HashMap<String, Marker> = hashMapOf()
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -56,20 +49,13 @@ class MarkerClusterRender<MyMarker: ClusterItem> @Inject constructor(
 
         val itemM = item as com.example.inzproject.data.dataclasses.MyMarker
 
-        GlobalScope.launch(Dispatchers.Unconfined) {
-            weather = viewModel.getWeatherIcon(item)
-            println(weather)
-        }
+        viewModel.getWeather(item.itemPosition.latitude, item.itemPosition.longitude)
 
-        icon = itemM.icon ?: (weather?.weatherType?.iconRes ?: R.drawable.ic_sunnycloudy)
+        icon = itemM.icon ?: (viewModel.weatherData?.weatherType?.iconRes ?: R.drawable.ic_sunnycloudy)
+
+        item.temperature = viewModel.weatherData?.temperatureCelsius
 
         markerOptions.icon(bitmapDescriptorFromVector(context, icon, itemM))
-
-        if ((item as com.example.inzproject.data.dataclasses.MyMarker).isSelected) {
-            markerOptions.alpha(SELECTED_ALPHA)
-        } else {
-            markerOptions.alpha(UNSELECTED_ALPHA)
-        }
     }
 
     override fun shouldRenderAsCluster(cluster: Cluster<MyMarker>): Boolean {
