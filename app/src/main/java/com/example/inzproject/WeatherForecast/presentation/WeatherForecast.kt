@@ -44,7 +44,7 @@ fun WeatherForecast(
                 text = "Prognoza na: ${day.toString().padStart(2, '0')}.${month.toString().padStart(2, '0')}.$year",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(5.dp))

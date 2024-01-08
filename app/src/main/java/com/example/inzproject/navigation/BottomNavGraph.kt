@@ -1,6 +1,8 @@
 package com.example.inzproject.navigation
 
+import android.os.Build
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +20,7 @@ import com.example.inzproject.screens.LikeToVisitScreen
 import com.example.inzproject.screens.MapScreen
 import com.example.inzproject.viewmodels.MainViewModel
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun BottomNavGraph(navHostController: NavHostController) {
 
@@ -55,10 +58,10 @@ fun BottomNavGraph(navHostController: NavHostController) {
             }
         }
 
-        composable(route = BottomRoutes.Settings.route) {
+        /*composable(route = BottomRoutes.Settings.route) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(text = "SETTINGS")
             }
-        }
+        }*/
     }
 }

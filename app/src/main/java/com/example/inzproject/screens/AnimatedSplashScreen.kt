@@ -37,8 +37,6 @@ fun AnimatedSplashScreen(navController: NavController) {
         )
     )
 
-
-
     LaunchedEffect(key1 = true) {
         startAnimation = true
         delay(2000)
