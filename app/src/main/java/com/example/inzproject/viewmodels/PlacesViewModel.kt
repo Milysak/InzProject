@@ -298,7 +298,7 @@ println(filterLocalization)
                              state = state.copy(
                                  PlaceInfo = null,
                                  isLoading = false,
-                                 error = "Couldn't retrieve location. Make sure to grant permission and enable GPS."
+                                 error = "Nie udało się pobrać lokalizacji. Upewnij się, że udzieliłeś pozwolenia i włącz GPS.”"
                              )
                          }
                      }
@@ -310,7 +310,7 @@ println(filterLocalization)
                  state = state.copy(
                      PlaceInfo = null,
                      isLoading = false,
-                     error = "Couldn't retrieve location. Make sure to grant permission and enable GPS"
+                     error = "Nie udało się pobrać lokalizacji. Upewnij się, że udzieliłeś pozwolenia i włącz GPS.”"
                  )
              }
 
@@ -331,7 +331,7 @@ println(filterLocalization)
                  state = state.copy(
                      PlaceInfo = null,
                      isLoading = false,
-                     error = "can not find the specified location"
+                     error = "Nie znaleziono miejsc spełniających twoje kryteria."
                  )
              }
 
@@ -367,7 +367,7 @@ if(canfindthelocation){
                      state = state.copy(
                          PlaceInfo = null,
                          isLoading = false,
-                         error = "No places with the specified parameters were found"
+                         error = "Nie znaleziono miejsc spełniających twoje kryteria."
                      )
                  } else {
 
@@ -412,7 +412,7 @@ if(canfindthelocation){
              state = state.copy(
                  PlaceInfo = null,
                  isLoading = false,
-                 error = "connot find the specified location"
+                 error = "Nie znaleziono miejsc spełniających twoje kryteria."
              )
 
          }
