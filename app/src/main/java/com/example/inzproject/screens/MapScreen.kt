@@ -377,16 +377,27 @@ fun MapScreen(
 
                 if (viewModel.location != "") {
                     addressList = geocoder.getFromLocationName(viewModel.location, 1)
-                    val address: Address = addressList!![0]
-                    val latLng = LatLng(address.latitude, address.longitude)
 
-                    map.animateCamera(
-                        CameraUpdateFactory.newLatLngZoom(
-                            latLng, 12f
-                        ),
-                        400,
-                        null
-                    )
+                    if (addressList?.isNotEmpty() == true) {
+                        val address: Address = addressList!![0]
+                        val latLng = LatLng(address.latitude, address.longitude)
+
+                        map.animateCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                latLng, 12f
+                            ),
+                            400,
+                            null
+                        )
+                    } else {
+                        Toast.makeText(
+                            mContext,
+                            "Nie znaleziono takiego miejsca!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    viewModel.location = ""
                 }
 
                 if (viewModel.coords != null) {
@@ -397,6 +408,8 @@ fun MapScreen(
                         400,
                         null
                     )
+
+                    viewModel.coords = null
                 }
 
                 cameraZoom = map.cameraPosition.zoom
@@ -447,8 +460,8 @@ fun MapScreen(
 
             LaunchedEffect(
                 key1 = cameraPositionState.isMoving,
-                key2 = isInit,
-                key3 = viewModel.specialMarkersChanged
+                key2 = viewModel.specialMarkersChanged,
+                key3 = isInit
             ) {
                 /*items.forEach { item ->
                 if (item.position == selectedItem?.position) item.isSelected = true
@@ -459,7 +472,10 @@ fun MapScreen(
                     if (viewModel.markers.isEmpty()) {
                         for (i in 0 .. 2) {
                             addMarker(
-                                currentScreen = currentScreen,
+                                currentScreen = LatLngBounds(
+                                    LatLng(-87.9093218814005, 30.60710693448717),
+                                    LatLng(-87.76016640751885, 163.05142668317936)
+                                ),
                                 markers = markers
                             )
                         }
