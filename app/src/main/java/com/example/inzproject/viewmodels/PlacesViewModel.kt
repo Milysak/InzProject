@@ -298,7 +298,7 @@ println(filterLocalization)
                              state = state.copy(
                                  PlaceInfo = null,
                                  isLoading = false,
-                                 error = "Couldn't retrieve location. Make sure to grant permission and enable GPS."
+                                 error = "Nie udało się pobrać lokalizacji. Upewnij się, że udzieliłeś pozwolenia i włącz GPS.”"
                              )
                          }
                      }
@@ -310,7 +310,7 @@ println(filterLocalization)
                  state = state.copy(
                      PlaceInfo = null,
                      isLoading = false,
-                     error = "Couldn't retrieve location. Make sure to grant permission and enable GPS"
+                     error = "Nie udało się pobrać lokalizacji. Upewnij się, że udzieliłeś pozwolenia i włącz GPS.”"
                  )
              }
 
@@ -331,7 +331,7 @@ println(filterLocalization)
                  state = state.copy(
                      PlaceInfo = null,
                      isLoading = false,
-                     error = "can not find the specified location"
+                     error = "Nie znaleziono miejsc spełniających twoje kryteria."
                  )
              }
 
@@ -360,17 +360,17 @@ if(canfindthelocation){
 
 
              if (result.isSuccessful) {
-println("succes")
+
                  if (result.body()?.results?.isEmpty() == true) {
 
-               println("empyt")
+
                      state = state.copy(
                          PlaceInfo = null,
                          isLoading = false,
-                         error = "No places with the specified parameters were found"
+                         error = "Nie znaleziono miejsc spełniających twoje kryteria."
                      )
                  } else {
-                     println("empyt2")
+
 
                      state = state.copy(
                          PlaceInfo = result.body(),
@@ -389,7 +389,7 @@ println("succes")
 
                  }
              } else {
-                 println("empyt3")
+
                  state = state.copy(
                      PlaceInfo = null,
                      isLoading = false,
@@ -408,11 +408,11 @@ println("succes")
 //             }
              }
          } else {
-             println("empyt4")
+
              state = state.copy(
                  PlaceInfo = null,
                  isLoading = false,
-                 error = "connot find the specified location"
+                 error = "Nie znaleziono miejsc spełniających twoje kryteria."
              )
 
          }

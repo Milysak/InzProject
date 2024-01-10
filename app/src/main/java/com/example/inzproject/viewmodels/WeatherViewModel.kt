@@ -122,7 +122,7 @@ class WeatherViewModel @Inject constructor(
                   kotlin.run {
                       state = state.copy(
                           isLoading = false,
-                          error = "Couldn't retrieve location. Make sure to grant permission and enable GPS. tak to to"
+                          error = "Nie udało się pobrać lokalizacji. Upewnij się, że udzieliłeś pozwolenia i włącz GPS."
                       )
                   }
                   textState = "err"
@@ -133,7 +133,7 @@ class WeatherViewModel @Inject constructor(
                         state = state.copy(
                       weatherInfo = null,
                             isLoading = false,
-                            error = "Couldn't retrieve location. Make sure to grant permission and enable GPS nie to to"
+                            error = "Nie udało się pobrać lokalizacji. Upewnij się, że udzieliłeś pozwolenia i włącz GPS."
 
                         )
                    textState = "err"
@@ -201,7 +201,7 @@ class WeatherViewModel @Inject constructor(
                     e.printStackTrace()
                     state = state.copy(
                         isLoading = false,
-                        error = "An unknown error occurred."
+                        error = "Napotkano nieznany błąd."
                     )
                 }
             }
