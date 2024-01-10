@@ -1,9 +1,6 @@
 package com.example.inzproject.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.location.Address
-import android.location.Geocoder
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -24,7 +21,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -32,17 +28,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Observer
 import com.example.inzproject.R
+import com.example.inzproject.components.AlertDialogDeletePlace
 import com.example.inzproject.components.MapSearchBar
 import com.example.inzproject.data.MarkerType
 import com.example.inzproject.data.mapROOM.database.SpecialPlace
-import com.example.inzproject.helpclasses.bitmapDescriptorFromVector
-import com.example.inzproject.helpclasses.bitmapDescriptorFromVectorForSpecialPlaces
+import com.example.inzproject.helpfunctions.*
 import com.example.inzproject.viewmodels.MapViewModel
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
 import com.google.maps.android.compose.*
-import kotlin.random.Random
 
 @RequiresApi(Build.VERSION_CODES.R)
 @SuppressLint("UnrememberedMutableState", "PotentialBehaviorOverride")
@@ -78,9 +71,6 @@ fun MapScreen(
     var isInit by mutableStateOf(false)
 
     var ifReorganizeMarkers by mutableStateOf(false)
-
-    val geocoder = Geocoder(LocalContext.current)
-    var addressList: List<Address>? = null
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
@@ -297,7 +287,7 @@ fun MapScreen(
             Box(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                AlertDialogExample(
+                AlertDialogDeletePlace(
                     onDismissRequest = {
                         deleteSpecialPlaceWindow = false
                     },
@@ -411,9 +401,7 @@ fun MapScreen(
                         reorganizeSpecialPlacesMarkers(
                             context = mContext,
                             viewModel = viewModel,
-                            map = map,
-                            currentScreen = currentScreen,
-                            cameraPositionState = cameraPositionState
+                            map = map
                         )
                     }
                 )
@@ -424,40 +412,18 @@ fun MapScreen(
                 key2 = viewModel.coords
             ) { map ->
                 if (viewModel.location != "") {
-                    addressList = geocoder.getFromLocationName(viewModel.location, 1)
-
-                    if (addressList?.isNotEmpty() == true) {
-                        val address: Address = addressList!![0]
-                        val latLng = LatLng(address.latitude, address.longitude)
-
-                        map.animateCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                latLng, 12f
-                            ),
-                            400,
-                            null
-                        )
-                    } else {
-                        Toast.makeText(
-                            mContext,
-                            "Nie znaleziono takiego miejsca!",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-
-                    viewModel.location = ""
+                    navigateToByName(
+                        context = mContext,
+                        viewModel = viewModel,
+                        map = map
+                    )
                 }
 
                 if (viewModel.coords != null) {
-                    map.animateCamera(
-                        CameraUpdateFactory.newLatLngZoom(
-                            viewModel.coords!!, 12f
-                        ),
-                        400,
-                        null
+                    navigateToByLatLng(
+                        viewModel = viewModel,
+                        map = map
                     )
-
-                    viewModel.coords = null
                 }
             }
 
@@ -471,202 +437,4 @@ fun MapScreen(
             }
         }
     }
-}
-
-@RequiresApi(Build.VERSION_CODES.R)
-fun reorganizeWeatherMarkers(
-    context: Context,
-    viewModel: MapViewModel,
-    map: GoogleMap,
-    currentScreen: LatLngBounds?,
-    cameraPositionState: CameraPositionState
-) {
-    fun createMarker() {
-        currentScreen?.let {
-            if (viewModel.markers.size < 3) {
-                val lat = randLat(it)
-                val lng = randLng(it)
-
-                viewModel.getWeather(
-                    latitude = lat,
-                    longitude = lng,
-                    onError = { weather ->
-                        viewModel.markers.add(
-                            map.addMarker(
-                                MarkerOptions()
-                                    .position(
-                                        LatLng(
-                                            lat,
-                                            lng
-                                        )
-                                    )
-                                    .icon(
-                                        bitmapDescriptorFromVector(
-                                            context,
-                                            R.drawable.notloadedicon_foreground,
-                                            MarkerType.Weather.toString()
-                                        )
-                                    )
-                                    .title(
-                                        MarkerType.Weather.toString()
-                                    )
-                                    .snippet(
-                                        "Błąd "
-                                    )
-                            )
-                        )
-                    }
-                ) { weather ->
-                    val temp: Double? = weather?.temperatureCelsius
-
-                    viewModel.markers.add(
-                        map.addMarker(
-                            MarkerOptions()
-                                .position(
-                                    LatLng(
-                                        lat,
-                                        lng
-                                    )
-                                )
-                                .icon(
-                                    bitmapDescriptorFromVector(
-                                        context,
-                                        weather?.weatherType?.iconRes
-                                            ?: R.drawable.notloadedicon_foreground,
-                                        MarkerType.Weather.toString()
-                                    )
-                                )
-                                .title(
-                                    MarkerType.Weather.toString()
-                                )
-                                .snippet(
-                                    temp?.toString()
-                                )
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    currentScreen?.let {
-        if (viewModel.markers.isEmpty()) {
-            for (i in 0..2) {
-                createMarker()
-            }
-        } else {
-            viewModel.markers.forEach { marker ->
-                if (
-                    marker?.position?.latitude!! in it.southwest.latitude .. it.northeast.latitude
-                    && marker?.position?.longitude!! in it.southwest.longitude .. it.northeast.longitude
-                ) {
-                    if (Math.abs(viewModel.cameraZoom - cameraPositionState.position.zoom) > 0.5f) {
-                        marker.remove()
-
-                        viewModel.markers = viewModel.markers.filter { it != marker } as MutableList<Marker?>
-
-                        createMarker()
-                    } else {
-                        // Do nothing
-                    }
-                } else {
-                    marker.remove()
-
-                    viewModel.markers = viewModel.markers.filter { it != marker } as MutableList<Marker?>
-
-                    createMarker()
-                }
-            }
-        }
-    }
-
-    viewModel.cameraZoom = cameraPositionState.position.zoom
-}
-
-@RequiresApi(Build.VERSION_CODES.R)
-fun reorganizeSpecialPlacesMarkers(
-    context: Context,
-    viewModel: MapViewModel,
-    map: GoogleMap,
-    currentScreen: LatLngBounds?,
-    cameraPositionState: CameraPositionState
-) {
-    viewModel.specialMarkers.forEach {
-        it?.remove()
-    }
-
-    viewModel.specialPlacesList.value?.forEach {
-        viewModel.specialMarkers.add(
-            map.addMarker(
-                MarkerOptions()
-                    .position(
-                        LatLng(it.latitute, it.longitute),
-                    )
-                    .icon(
-                        bitmapDescriptorFromVectorForSpecialPlaces(
-                            context,
-                            R.drawable.marker_foreground,
-                        ),
-                    )
-                    .title(
-                        MarkerType.SpecialPlace.toString(),
-                    )
-                    .snippet(
-                        it.itemTitle,
-                    ),
-            ),
-        )
-    }
-}
-
-fun randLat(it: LatLngBounds) : Double = Random.nextDouble(
-    it.southwest.latitude + (it.northeast.latitude - it.southwest.latitude) / 5,
-    it.northeast.latitude - (it.northeast.latitude - it.southwest.latitude) / 5
-)
-
-fun randLng(it: LatLngBounds) : Double = Random.nextDouble(
-    it.southwest.longitude + (it.northeast.longitude - it.southwest.longitude) / 5,
-    it.northeast.longitude - (it.northeast.longitude - it.southwest.longitude) / 5
-)
-
-@Composable
-fun AlertDialogExample(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    dialogTitle: String,
-    dialogText: String,
-    icon: ImageVector,
-) {
-    AlertDialog(
-        icon = {
-            Icon(icon, contentDescription = "Example Icon")
-        },
-        title = {
-            Text(text = dialogTitle)
-        },
-        text = {
-            Text(text = dialogText)
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text("Usuń")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Anuluj")
-            }
-        }
-    )
 }
