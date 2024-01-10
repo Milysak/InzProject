@@ -1,33 +1,23 @@
 package com.example.inzproject.viewmodels
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.inzproject.R
-import com.example.inzproject.WeatherForecast.domain.repository.WeatherRepository2
-import com.example.inzproject.data.MarkerType
-import com.example.inzproject.data.dataclasses.MyMarker
+import androidx.lifecycle.*
 import com.example.inzproject.data.mapROOM.database.SpecialPlace
 import com.example.inzproject.data.mapROOM.repository.SpecialPlaceRepository
 import com.example.inzproject.domain.location.LocationTracker
 import com.example.inzproject.domain.repository.WeatherRepository
+import com.example.inzproject.domain.util.Resource
 import com.example.inzproject.domain.weather.WeatherData
-import com.example.inzproject.domain.weather.WeatherType
 import com.example.inzproject.mapstyles.DarkMapStyle
 import com.example.inzproject.mapstyles.LightMapStyle
 import com.example.inzproject.states.MapState
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.maps.android.clustering.ClusterItem
+import com.google.android.gms.maps.model.Marker
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,6 +27,8 @@ class MapViewModel @Inject constructor(
     private var locationTracker: LocationTracker,
     ): ViewModel() {
     var state by mutableStateOf(MapState())
+
+    var cameraZoom by mutableStateOf(0f)
 
     var location by mutableStateOf("")
 
@@ -54,28 +46,58 @@ class MapViewModel @Inject constructor(
 
     var zoom by mutableStateOf(12f)
 
-    var markers = mutableListOf<MyMarker>()
+    var markers = mutableListOf<Marker?>()
 
-    var specialMarkers = mutableListOf<MyMarker>()
+    var specialMarkers = mutableListOf<Marker?>()
 
     var specialMarkersChanged by mutableStateOf(false)
 
     var added by mutableStateOf(false)
 
-    val specialPlacesList: LiveData<List<SpecialPlace>> = specialPlaceRepository.allSpecialPlaces
+    val specialPlacesList: LiveData<List<SpecialPlace>> = specialPlaceRepository.allSpecialPlaces.asLiveData()
+
+    var specialPlaces = mutableListOf<SpecialPlace>()
 
     private val darkMapTheme = MapStyleOptions(DarkMapStyle.json)
 
     private val lightMapTheme = MapStyleOptions(LightMapStyle.json)
 
     var weatherData: WeatherData? by mutableStateOf(null)
+        private set
 
-    fun getWeather(latitude: Double, longitude: Double) {
+    fun getWeather(
+        latitude: Double,
+        longitude: Double,
+        onError: (WeatherData?) -> Unit,
+        onSuccess: (WeatherData?) -> Unit
+        ) {
         viewModelScope.launch {
-            weatherData = repository.getWeatherData(latitude, longitude)
-                .data?.currentWeatherData
+
+            val result = withContext(Dispatchers.IO) {
+                repository.getWeatherData(latitude, longitude)
+            }
+
+            when (
+                result
+            ) {
+                is Resource.Success -> {
+                    onSuccess(result.data?.currentWeatherData)
+                }
+                is Resource.Error -> {
+                    onError(result.data?.currentWeatherData)
+                }
+            }
+
         }
     }
+
+    fun getWeatherIcon(
+        latitude: Double,
+        longitude: Double
+    ) : Int? = runBlocking {
+            repository.getWeatherData(latitude, longitude).data?.currentWeatherData?.weatherType?.iconRes
+        }
+
 
     fun setDarkMapTheme() {
         state = state.copy(
@@ -93,35 +115,28 @@ class MapViewModel @Inject constructor(
         )
     }
 
-    fun getAllSpecialPlaces(){
+    /*fun getAllSpecialPlaces() {
         specialPlaceRepository.getAllSpecialPlaces()
-    }
+    }*/
 
-    fun addSpecialPlace(specialPlace: SpecialPlace) {
+    fun addSpecialPlace(specialPlace: SpecialPlace) = viewModelScope.launch {
         specialPlaceRepository.addSpecialPlace(specialPlace)
-
-        getAllSpecialPlaces()
-
-        specialMarkersChanged = true
     }
 
-    fun deleteSpecialPlace(specialPlace: SpecialPlace) {
+    fun deleteSpecialPlace(specialPlace: SpecialPlace) = viewModelScope.launch {
         specialPlaceRepository.deleteSpecialPlace(specialPlace)
-
-        getAllSpecialPlaces()
-
-        specialMarkersChanged = true
     }
 
     fun setCurrentLocation() {
         viewModelScope.launch {
             try {
                 locationTracker.getCurrentLocation()!!.let { location ->
-                    coords = LatLng(location.latitude, location.longitude)
+                    latitude = location.latitude
+                    longitude = location.longitude
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                coords = LatLng(latitude, longitude)
+                // Bez zmian
             }
         }
     }

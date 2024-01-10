@@ -26,33 +26,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Observer
 import com.example.inzproject.R
 import com.example.inzproject.components.MapSearchBar
 import com.example.inzproject.data.MarkerType
-import com.example.inzproject.data.dataclasses.MyMarker
 import com.example.inzproject.data.mapROOM.database.SpecialPlace
-import com.example.inzproject.helpclasses.MarkerClusterRender
 import com.example.inzproject.helpclasses.bitmapDescriptorFromVector
+import com.example.inzproject.helpclasses.bitmapDescriptorFromVectorForSpecialPlaces
 import com.example.inzproject.viewmodels.MapViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
-import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.compose.*
 import kotlin.random.Random
 
 @RequiresApi(Build.VERSION_CODES.R)
-@SuppressLint("UnrememberedMutableState")
+@SuppressLint("UnrememberedMutableState", "PotentialBehaviorOverride")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
     viewModel : MapViewModel = hiltViewModel(),
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
     val mContext = LocalContext.current
+
+    val owner = LocalLifecycleOwner.current
 
     var fabPosition: FabPosition by remember {
         mutableStateOf(FabPosition.End)
@@ -74,21 +75,22 @@ fun MapScreen(
         mutableStateOf(false)
     }
 
+    var isInit by mutableStateOf(false)
+
+    var ifReorganizeMarkers by mutableStateOf(false)
+
     val geocoder = Geocoder(LocalContext.current)
     var addressList: List<Address>? = null
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(viewModel.latitude, viewModel.longitude), viewModel.zoom)
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(
+                viewModel.latitude,
+                viewModel.longitude
+            ),
+            viewModel.zoom)
     }
 
-    viewModel.getAllSpecialPlaces()
-
-    viewModel.setCurrentLocation()
-
-    /*viewModel.markers.add(com.example.inzproject.data.dataclasses.MyMarker(LatLng(50.24107598158953, 18.99944985875562)))
-    viewModel.markers.add(com.example.inzproject.data.dataclasses.MyMarker(LatLng(50.18404284819005, 19.060459047724578)))
-    viewModel.markers.add(com.example.inzproject.data.dataclasses.MyMarker(LatLng(50.18837862274404, 18.956688860933173)))
-*/
     Scaffold(
         floatingActionButtonPosition = fabPosition,
         topBar = {
@@ -140,6 +142,10 @@ fun MapScreen(
                                     modifier = Modifier
                                         .scale(0.8f),
                                     onClick = {
+                                        active = !active
+
+                                        floatingButtonIcon = Icons.Default.Navigation
+
                                         viewModel.coords = LatLng(item.latitute, item.longitute)
                                     },
                                     containerColor = MaterialTheme.colorScheme.secondary
@@ -192,7 +198,7 @@ fun MapScreen(
                     FloatingActionButton(
                         onClick = {
                             if (textState.isNotEmpty()) {
-                                if (viewModel.specialMarkers.size >= 5) {
+                                if ((viewModel.specialPlacesList.value?.size ?: 0) >= 5) {
                                     Toast.makeText(
                                         mContext,
                                         "Nie możesz dodać więcej niż 5 miejsc!",
@@ -281,10 +287,6 @@ fun MapScreen(
             }
         }
     ) {
-        var isInit by mutableStateOf(false)
-
-        var cameraZoom = 0f
-
         if (isSystemInDarkTheme()) {
             viewModel.setDarkMapTheme()
         } else {
@@ -350,13 +352,6 @@ fun MapScreen(
             }
         ) {
             val currentScreen: LatLngBounds? by mutableStateOf(cameraPositionState.projection?.visibleRegion?.latLngBounds)
-            //val items by mutableStateOf(arrayListOf<MyItem>())
-
-            /*viewModel.markers.forEach { marker ->
-                items.add(MyItem(LatLng(marker.latitude, marker.longitude), "Title", "S"))
-            }*/
-
-            var clusterManager by remember { mutableStateOf<ClusterManager<MyMarker>?>(null) }
 
             viewModel.newPlaceLocation?.let { it1 ->
                 MarkerState(
@@ -365,8 +360,62 @@ fun MapScreen(
             }?.let { it2 ->
                 Marker(
                     state = it2,
-                    icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.plus_outlined),
-                    visible = viewModel.newPlaceVisibility
+                    icon = bitmapDescriptorFromVectorForSpecialPlaces(
+                        mContext,
+                        R.drawable.plusspecialmarker_foreground
+                    ),
+                    visible = viewModel.newPlaceVisibility,
+                    onClick = {
+                        true
+                    }
+                )
+            }
+
+            MapEffect(key1 = ifReorganizeMarkers) {map ->
+                reorganizeWeatherMarkers(
+                    context = mContext,
+                    viewModel = viewModel,
+                    map = map,
+                    currentScreen = currentScreen,
+                    cameraPositionState = cameraPositionState
+                )
+            }
+
+            MapEffect(key1 = isInit) { map ->
+                map.setOnMarkerClickListener{
+                    if (
+                        it.title == MarkerType.SpecialPlace.toString()
+                    ) {
+
+                        viewModel.selectedSpecialPlace = SpecialPlace(
+                            latitute = it.position.latitude,
+                            longitute = it.position.longitude,
+                            itemTitle = it.snippet!!
+                        )
+
+                        deleteSpecialPlaceWindow = true
+                    } else {
+                            Toast.makeText(
+                                mContext,
+                                "${it.snippet}°C",
+                                Toast.LENGTH_SHORT).show()
+                    }
+                    true
+                }
+
+                viewModel.cameraZoom = map.cameraPosition.zoom
+
+                viewModel.specialPlacesList.observe(
+                    owner,
+                    Observer {
+                        reorganizeSpecialPlacesMarkers(
+                            context = mContext,
+                            viewModel = viewModel,
+                            map = map,
+                            currentScreen = currentScreen,
+                            cameraPositionState = cameraPositionState
+                        )
+                    }
                 )
             }
 
@@ -374,7 +423,6 @@ fun MapScreen(
                 key1 = viewModel.location,
                 key2 = viewModel.coords
             ) { map ->
-
                 if (viewModel.location != "") {
                     addressList = geocoder.getFromLocationName(viewModel.location, 1)
 
@@ -411,136 +459,175 @@ fun MapScreen(
 
                     viewModel.coords = null
                 }
-
-                cameraZoom = map.cameraPosition.zoom
-
-                // map.addCircle(viewModel.circle)
-                viewModel.markers.clear()
-
-                if (clusterManager == null) {
-                    clusterManager = ClusterManager<MyMarker>(mContext, map).apply {
-                        renderer = MarkerClusterRender(viewModel, mContext, map, this) { }
-                    }
-                }
-
-//                 clusterManager?.renderer = MarkerClusterRender(mContext, map, clusterManager!!)
-
-                clusterManager?.clearItems()
-
-                clusterManager?.setOnClusterClickListener { cluster ->
-                    val builder = LatLngBounds.builder()
-                    for (item in cluster.items) {
-                        builder.include(item.position)
-                    }
-                    val bounds = builder.build()
-                    map.animateCamera(
-                        CameraUpdateFactory.newLatLngBounds(bounds, 100),
-                        400,
-                        null
-                    )
-                    true
-                }
-
-                clusterManager?.setOnClusterItemClickListener { item ->
-                    if (item.type == MarkerType.SpecialPlace) {
-
-                        viewModel.selectedSpecialPlace = SpecialPlace(
-                            latitute = item.itemPosition.latitude,
-                            longitute = item.itemPosition.longitude,
-                            itemTitle = item.itemTitle
-                        )
-
-                        deleteSpecialPlaceWindow = true
-                    } else {
-                        Toast.makeText(mContext, "${item.temperature}°C", Toast.LENGTH_SHORT).show()
-                    }
-                    true
-                }
             }
 
             LaunchedEffect(
                 key1 = cameraPositionState.isMoving,
-                key2 = viewModel.specialMarkersChanged,
-                key3 = isInit
+                key2 = viewModel.specialPlacesList.value
             ) {
-                /*items.forEach { item ->
-                if (item.position == selectedItem?.position) item.isSelected = true
-            }*/
-                currentScreen?.apply {
-                    val markers = mutableListOf<MyMarker>()
-
-                    if (viewModel.markers.isEmpty()) {
-                        for (i in 0 .. 2) {
-                            addMarker(
-                                currentScreen = LatLngBounds(
-                                    LatLng(-87.9093218814005, 30.60710693448717),
-                                    LatLng(-87.76016640751885, 163.05142668317936)
-                                ),
-                                markers = markers
-                            )
-                        }
-                    } else {
-                        viewModel.markers.forEach { myMarker ->
-                            if (
-                                myMarker.itemPosition.latitude in southwest.latitude .. northeast.latitude
-                                    && myMarker.itemPosition.longitude in southwest.longitude .. northeast.longitude
-                            ) {
-                                if (Math.abs(cameraZoom - cameraPositionState.position.zoom) > 0.5f)
-                                    addMarker(
-                                        currentScreen = currentScreen,
-                                        markers = markers
-                                    )
-                                else
-                                    markers.add(myMarker)
-                            } else {
-                                addMarker(
-                                    currentScreen = currentScreen,
-                                    markers = markers
-                                )
-                            }
-                        }
-                    }
-
-                    viewModel.markers.clear()
-
-                    markers.forEach {
-                        viewModel.markers.add(it)
-                    }
-
-                    cameraZoom = cameraPositionState.position.zoom
-
-                    clusterManager?.clearItems()
-
-                    clusterManager?.addItems(viewModel.markers)
-
-                    viewModel.specialMarkers.clear()
-
-                    viewModel.getAllSpecialPlaces()
-
-                    viewModel.specialPlacesList.value?.forEach { specialPlace ->
-                        viewModel.specialMarkers.add(
-                            MyMarker(
-                                itemPosition = LatLng(specialPlace.latitute, specialPlace.longitute),
-                                itemTitle = specialPlace.itemTitle,
-                                type = MarkerType.SpecialPlace,
-                                icon = R.drawable.ic_specialplace_outlined_foreground
-                            )
-                        )
-                    }
-
-                    clusterManager?.addItems(viewModel.specialMarkers)
-
-                    clusterManager?.onCameraIdle()
-
-                    clusterManager?.cluster()
-                }
-
-                viewModel.specialMarkersChanged = false
-                //isInit = false
+                if (
+                    !cameraPositionState.isMoving || viewModel.specialMarkersChanged
+                ) ifReorganizeMarkers = !ifReorganizeMarkers
             }
         }
     }
 }
+
+@RequiresApi(Build.VERSION_CODES.R)
+fun reorganizeWeatherMarkers(
+    context: Context,
+    viewModel: MapViewModel,
+    map: GoogleMap,
+    currentScreen: LatLngBounds?,
+    cameraPositionState: CameraPositionState
+) {
+    fun createMarker() {
+        currentScreen?.let {
+            if (viewModel.markers.size < 3) {
+                val lat = randLat(it)
+                val lng = randLng(it)
+
+                viewModel.getWeather(
+                    latitude = lat,
+                    longitude = lng,
+                    onError = { weather ->
+                        viewModel.markers.add(
+                            map.addMarker(
+                                MarkerOptions()
+                                    .position(
+                                        LatLng(
+                                            lat,
+                                            lng
+                                        )
+                                    )
+                                    .icon(
+                                        bitmapDescriptorFromVector(
+                                            context,
+                                            R.drawable.notloadedicon_foreground,
+                                            MarkerType.Weather.toString()
+                                        )
+                                    )
+                                    .title(
+                                        MarkerType.Weather.toString()
+                                    )
+                                    .snippet(
+                                        "Błąd "
+                                    )
+                            )
+                        )
+                    }
+                ) { weather ->
+                    val temp: Double? = weather?.temperatureCelsius
+
+                    viewModel.markers.add(
+                        map.addMarker(
+                            MarkerOptions()
+                                .position(
+                                    LatLng(
+                                        lat,
+                                        lng
+                                    )
+                                )
+                                .icon(
+                                    bitmapDescriptorFromVector(
+                                        context,
+                                        weather?.weatherType?.iconRes
+                                            ?: R.drawable.notloadedicon_foreground,
+                                        MarkerType.Weather.toString()
+                                    )
+                                )
+                                .title(
+                                    MarkerType.Weather.toString()
+                                )
+                                .snippet(
+                                    temp?.toString()
+                                )
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    currentScreen?.let {
+        if (viewModel.markers.isEmpty()) {
+            for (i in 0..2) {
+                createMarker()
+            }
+        } else {
+            viewModel.markers.forEach { marker ->
+                if (
+                    marker?.position?.latitude!! in it.southwest.latitude .. it.northeast.latitude
+                    && marker?.position?.longitude!! in it.southwest.longitude .. it.northeast.longitude
+                ) {
+                    if (Math.abs(viewModel.cameraZoom - cameraPositionState.position.zoom) > 0.5f) {
+                        marker.remove()
+
+                        viewModel.markers = viewModel.markers.filter { it != marker } as MutableList<Marker?>
+
+                        createMarker()
+                    } else {
+                        // Do nothing
+                    }
+                } else {
+                    marker.remove()
+
+                    viewModel.markers = viewModel.markers.filter { it != marker } as MutableList<Marker?>
+
+                    createMarker()
+                }
+            }
+        }
+    }
+
+    viewModel.cameraZoom = cameraPositionState.position.zoom
+}
+
+@RequiresApi(Build.VERSION_CODES.R)
+fun reorganizeSpecialPlacesMarkers(
+    context: Context,
+    viewModel: MapViewModel,
+    map: GoogleMap,
+    currentScreen: LatLngBounds?,
+    cameraPositionState: CameraPositionState
+) {
+    viewModel.specialMarkers.forEach {
+        it?.remove()
+    }
+
+    viewModel.specialPlacesList.value?.forEach {
+        viewModel.specialMarkers.add(
+            map.addMarker(
+                MarkerOptions()
+                    .position(
+                        LatLng(it.latitute, it.longitute),
+                    )
+                    .icon(
+                        bitmapDescriptorFromVectorForSpecialPlaces(
+                            context,
+                            R.drawable.marker_foreground,
+                        ),
+                    )
+                    .title(
+                        MarkerType.SpecialPlace.toString(),
+                    )
+                    .snippet(
+                        it.itemTitle,
+                    ),
+            ),
+        )
+    }
+}
+
+fun randLat(it: LatLngBounds) : Double = Random.nextDouble(
+    it.southwest.latitude + (it.northeast.latitude - it.southwest.latitude) / 5,
+    it.northeast.latitude - (it.northeast.latitude - it.southwest.latitude) / 5
+)
+
+fun randLng(it: LatLngBounds) : Double = Random.nextDouble(
+    it.southwest.longitude + (it.northeast.longitude - it.southwest.longitude) / 5,
+    it.northeast.longitude - (it.northeast.longitude - it.southwest.longitude) / 5
+)
 
 @Composable
 fun AlertDialogExample(
@@ -582,25 +669,4 @@ fun AlertDialogExample(
             }
         }
     )
-}
-
-
-fun addMarker(currentScreen: LatLngBounds?, markers: MutableList<MyMarker>) {
-    currentScreen?.let {
-        markers.add(
-            MyMarker(
-                itemPosition =  LatLng(
-                    Random.nextDouble(
-                        it.southwest.latitude + (it.northeast.latitude - it.southwest.latitude) / 5,
-                        it.northeast.latitude - (it.northeast.latitude - it.southwest.latitude) / 5
-                    ),
-                    Random.nextDouble(
-                        it.southwest.longitude + (it.northeast.longitude - it.southwest.longitude) / 5,
-                        it.northeast.longitude - (it.northeast.longitude - it.southwest.longitude) / 5
-                    ),
-                ),
-                type = MarkerType.Weather
-            )
-        )
-    }
 }

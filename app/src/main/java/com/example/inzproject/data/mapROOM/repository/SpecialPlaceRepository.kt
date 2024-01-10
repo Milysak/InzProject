@@ -5,6 +5,7 @@ import com.example.inzproject.data.mapROOM.database.SpecialPlace
 import com.example.inzproject.data.mapROOM.database.SpecialPlaceDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -12,7 +13,7 @@ class SpecialPlaceRepository @Inject constructor(
     private val specialPlaceDao: SpecialPlaceDao
     ) {
 
-    val allSpecialPlaces = MutableLiveData<List<SpecialPlace>>()
+    val allSpecialPlaces: Flow<List<SpecialPlace>> = specialPlaceDao.getAllPlaces()
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
@@ -28,13 +29,13 @@ class SpecialPlaceRepository @Inject constructor(
         }
     }
 
-    fun getAllSpecialPlaces() {
+    /*fun getAllSpecialPlaces() {
         coroutineScope.launch(Dispatchers.IO) {
             allSpecialPlaces.postValue(
                 specialPlaceDao.getAllPlaces()
             )
         }
-    }
+    }*/
 
     fun deleteSpecialPlace(specialPlace: SpecialPlace) {
         coroutineScope.launch(Dispatchers.IO) {

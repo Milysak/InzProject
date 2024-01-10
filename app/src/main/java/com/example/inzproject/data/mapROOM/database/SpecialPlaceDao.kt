@@ -1,6 +1,7 @@
 package com.example.inzproject.data.mapROOM.database
 
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SpecialPlaceDao {
@@ -12,7 +13,7 @@ interface SpecialPlaceDao {
     suspend fun deletePlace(itemTitle: String, latitute: Double, longitute: Double)
 
     @Query("SELECT * FROM special_places")
-    fun getAllPlaces(): List<SpecialPlace>
+    fun getAllPlaces(): Flow<List<SpecialPlace>>
 
     @Update
     suspend fun updatePlaceDetails(place: SpecialPlace)

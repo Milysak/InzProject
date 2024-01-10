@@ -8,7 +8,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.clustering.ClusterItem
 
 data class MyMarker(
-    val itemPosition: LatLng,
+    var itemPosition: LatLng,
     val itemTitle: String = "Marker",
     var itemSnippet: String = "M",
     val type: MarkerType,
