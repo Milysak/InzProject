@@ -4,10 +4,7 @@ import android.graphics.Paint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowCircleUp
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,13 +15,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.inzproject.R
 import com.example.inzproject.compass.Cardinal
 import com.example.inzproject.compass.SensorDataManager
 import com.example.inzproject.helpfunctions.createGradientBrush
@@ -45,7 +37,7 @@ fun CompassScreen() {
             )
         ),
     ) {
-        var currentDegree by remember { mutableStateOf(0f) }
+        var degree by remember { mutableStateOf(0f) }
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
 
@@ -56,8 +48,10 @@ fun CompassScreen() {
             val job = scope.launch {
                 dataManager.data
                     .receiveAsFlow()
-                    .onEach { currentDegree = it }
-                    .collect {}
+                    .onEach { degree = it }
+                    .collect {
+
+                    }
             }
             onDispose {
                 dataManager.cancel()
@@ -69,18 +63,11 @@ fun CompassScreen() {
         val arrowPosColor = MaterialTheme.colorScheme.primary.copy(0.75f)
         val arrowNegColor = MaterialTheme.colorScheme.primary
 
-        val vector = Icons.Default.ArrowCircleUp
-        val painter = rememberVectorPainter(image = vector)
-
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            /*Text(
-            text = "$currentDegree° ${Cardinal.fromDegree(currentDegree.toInt()).letter}",
-            fontSize = 22.5.sp
-        )*/
             Canvas(
                 modifier = Modifier
                     .width(128.dp)
@@ -99,7 +86,7 @@ fun CompassScreen() {
                 arrowPath.lineTo(size.width / 2 - 45, size.height / 2)
                 arrowPath.lineTo(size.width / 2, (size.height * .95).toFloat())
 
-                rotate(-currentDegree) {
+                rotate(-degree) {
                     Cardinal.values().forEach {
                         rotate(it.degree.toFloat()) {
                             drawContext.canvas.nativeCanvas.apply {
@@ -142,8 +129,12 @@ fun CompassScreen() {
 
                 drawLine(
                     color = arrowNegColor,
-                    start = Offset(x = size.width / 2, ((size.height / 2) - size.width) + 30),
-                    end = Offset(x = size.width / 2, ((size.height / 2) - size.width) - 30),
+                    start = Offset(
+                        x = size.width / 2, ((size.height / 2) - size.width) + 30
+                    ),
+                    end = Offset(
+                        x = size.width / 2, ((size.height / 2) - size.width) - 30
+                    ),
                     strokeWidth = 12f,
                 )
             }

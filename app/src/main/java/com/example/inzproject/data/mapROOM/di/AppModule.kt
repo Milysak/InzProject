@@ -11,7 +11,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
     @Singleton
     @Provides
     fun provideEmployeeRepository(specialPlaceDao: SpecialPlaceDao): SpecialPlaceRepository {

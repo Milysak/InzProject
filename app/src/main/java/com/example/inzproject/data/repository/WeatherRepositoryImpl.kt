@@ -24,4 +24,5 @@ class WeatherRepositoryImpl @Inject constructor(
             Resource.Error(e.message ?: "An unknown error occurred.")
         }
     }
+
 }

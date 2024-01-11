@@ -6,6 +6,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import kotlinx.coroutines.channels.Channel
+import kotlin.math.roundToInt
 
 class SensorDataManager (context: Context): SensorEventListener {
     private val sensorManager by lazy {
@@ -22,12 +23,17 @@ class SensorDataManager (context: Context): SensorEventListener {
     val data: Channel<Float> = Channel(Channel.UNLIMITED)
 
     override fun onSensorChanged(event: SensorEvent) {
-        val degree = Math.round(event.values[0]).toFloat()
+        val degree = event.values[0].roundToInt().toFloat()
 
         data.trySend(degree)
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    override fun onAccuracyChanged(
+        sensor: Sensor?,
+        accuracy: Int
+    ) {
+
+    }
 
     fun cancel() {
         sensorManager.unregisterListener(this);

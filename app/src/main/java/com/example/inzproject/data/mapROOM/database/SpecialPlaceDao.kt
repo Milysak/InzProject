@@ -15,7 +15,4 @@ interface SpecialPlaceDao {
     @Query("SELECT * FROM special_places")
     fun getAllPlaces(): Flow<List<SpecialPlace>>
 
-    @Update
-    suspend fun updatePlaceDetails(place: SpecialPlace)
-
 }

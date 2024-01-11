@@ -1,6 +1,5 @@
 package com.example.inzproject.data.mapROOM.repository
 
-import androidx.lifecycle.MutableLiveData
 import com.example.inzproject.data.mapROOM.database.SpecialPlace
 import com.example.inzproject.data.mapROOM.database.SpecialPlaceDao
 import kotlinx.coroutines.CoroutineScope
@@ -22,20 +21,6 @@ class SpecialPlaceRepository @Inject constructor(
             specialPlaceDao.addPlace(newSpecialPlace)
         }
     }
-
-    fun updateSpecialPlaceDetails(newSpecialPlace: SpecialPlace) {
-        coroutineScope.launch(Dispatchers.IO) {
-            specialPlaceDao.updatePlaceDetails(newSpecialPlace)
-        }
-    }
-
-    /*fun getAllSpecialPlaces() {
-        coroutineScope.launch(Dispatchers.IO) {
-            allSpecialPlaces.postValue(
-                specialPlaceDao.getAllPlaces()
-            )
-        }
-    }*/
 
     fun deleteSpecialPlace(specialPlace: SpecialPlace) {
         coroutineScope.launch(Dispatchers.IO) {

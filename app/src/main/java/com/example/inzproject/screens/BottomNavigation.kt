@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -34,8 +33,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.inzproject.helpfunctions.createGradientBrush
 import com.example.inzproject.navigation.BottomNavGraph
 import com.example.inzproject.navigation.BottomRoutes
-import com.example.inzproject.navigation.Routes
-import com.example.inzproject.viewmodels.WeatherViewModel
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
@@ -56,14 +53,12 @@ fun BottomNavigation() {
 
 @Composable
 fun BottomBar(navController: NavHostController) {
-    val density = LocalDensity.current.density
 
     val screens = listOf(
         BottomRoutes.Home,
         BottomRoutes.LikeToVisit,
         BottomRoutes.Map,
         BottomRoutes.Compass,
-        /*BottomRoutes.Settings*/
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -90,13 +85,6 @@ fun BottomBar(navController: NavHostController) {
                 .fillMaxWidth()
                 .height(3.dp)
         ) {
-
-            /*Box(modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary)
-            .clip(CircleShape)
-            .size(offSetX.dp, 3.dp)
-            .offset(offSetX.dp, 0.dp)
-        ) {  }*/
 
         }
 
@@ -149,7 +137,6 @@ fun BottomBar(navController: NavHostController) {
                             modifier = Modifier
                                 .onGloballyPositioned { coords ->
                                     if (selected) {
-                                        //offSet = coords.positionInRoot().x / density + coords.size.width / density / 2
                                         offSet = coords.positionInRoot().x + coords.size.width / 2
                                     }
                                 }
@@ -165,13 +152,6 @@ fun BottomBar(navController: NavHostController) {
                 .fillMaxWidth()
                 .height(3.dp)
         ) {
-
-            /*Box(modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary)
-            .clip(CircleShape)
-            .size(offSetX.dp, 3.dp)
-            .offset(offSetX.dp, 0.dp)
-        ) {  }*/
 
             Layout(content = {
                 Box(
