@@ -98,7 +98,7 @@ fun PlacesCard(
                                 ) { clickedPlace ->
 
                                 // Create a Uri from an intent string. Use the result to create an Intent.
-                                val gmmIntentUri = Uri.parse("geo:0,0?q=${clickedPlace.name}")
+                                val gmmIntentUri = Uri.parse("geo:0,0?q=${clickedPlace.name}+${clickedPlace.vicinity}")
 
                                 // Create an Intent from gmmIntentUri. Set the action to ACTION_VIEW
                                 val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
