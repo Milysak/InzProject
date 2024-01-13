@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.inzproject.R
 import com.example.inzproject.helpfunctions.createGradientBrush
 import com.example.inzproject.navigation.Routes
 import kotlinx.coroutines.delay
@@ -53,12 +54,6 @@ fun SplashScreen(alpha: Float) {
         .fillMaxSize()
         .background(
             MaterialTheme.colorScheme.background
-            /*createGradientBrush(
-                listOf(
-                    MaterialTheme.colorScheme.background,
-                    MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
-                )
-            )*/
         ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -72,15 +67,11 @@ fun SplashScreen(alpha: Float) {
             modifier = Modifier
                 .alpha(alpha = alpha),
             fontSize = 20.sp,
-            text = "Travel App",
+            text = "Niezbędnik\npodróżnika",
             color = MaterialTheme.colorScheme.onBackground,
             fontStyle = FontStyle.Italic,
             fontWeight = FontWeight.Bold
         )
-    }
-
-    Box() {
-        
     }
 }
 
