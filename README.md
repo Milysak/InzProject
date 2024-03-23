@@ -21,5 +21,7 @@ To aplikacja mobilna stworzona dla osób lubiących podróżować, ponieważ gwa
 
 <img src="https://raw.githubusercontent.com/Milysak/InzProject/master/AppScreens/dodanieMiejsca.png?raw=true" width="256">
 
+<img src="https://raw.githubusercontent.com/Milysak/InzProject/master/AppScreens/szybkaNawigacjaDoMiejsca.png?raw=true" width="256">
+
 <img src="https://raw.githubusercontent.com/Milysak/InzProject/master/AppScreens/kompas.png?raw=true" width="256">
 
