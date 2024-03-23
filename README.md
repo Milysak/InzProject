@@ -9,3 +9,5 @@ To aplikacja mobilna stworzona dla osób lubiących podróżować, ponieważ gwa
 -zlokalizowanie najlepiej ocenionych w Google atrakcji w okolicy, 
 
 -także kompas.
+
+<img src="https://raw.githubusercontent.com/Milysak/InzProject/master/AppScreens/Uruchamianie.png?raw=true" width="256">
